@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique @db.VarChar(50)
+  password  String   @db.VarChar(255)
+  fullName  String   @db.VarChar(100)
+  role      String   @default("admin") @db.VarChar(20)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  familyLineAccess UserFamilyLine[]
+
+  @@map("users")
+}
+
+model FamilyLine {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(200)
+  description   String?  @db.Text
+  originPlace   String?  @db.VarChar(300)
+  isPublic      Boolean  @default(false)
+  shareToken    String?  @unique @db.VarChar(64)
+  sharePassword String?  @db.VarChar(255)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  members            Member[]
+  deathAnniversaries DeathAnniversary[]
+  userAccess         UserFamilyLine[]
+  shareAccessLogs    ShareAccessLog[]
+
+  @@map("family_lines")
+}
+
+model Member {
+  id           Int        @id @default(autoincrement())
+  familyLineId Int
+  familyLine   FamilyLine @relation(fields: [familyLineId], references: [id], onDelete: Cascade)
+
+  fullName   String    @db.VarChar(200)
+  gender     String    @db.VarChar(10)
+  birthDate  DateTime? @db.Date
+  deathDate  DateTime? @db.Date
+  isAlive    Boolean   @default(true)
+  birthPlace String?   @db.VarChar(300)
+  avatarUrl  String?   @db.VarChar(500)
+  bio        String?   @db.Text
+  generation Int       @default(1)
+  birthOrder Int       @default(1)
+
+  fatherId Int?
+  father   Member?  @relation("FatherChildren", fields: [fatherId], references: [id], onDelete: SetNull)
+  fatherOf Member[] @relation("FatherChildren")
+
+  motherId Int?
+  mother   Member?  @relation("MotherChildren", fields: [motherId], references: [id], onDelete: SetNull)
+  motherOf Member[] @relation("MotherChildren")
+
+  deathAnniversaryLunar String? @db.VarChar(20)
+  deathAnniversaryNote  String? @db.VarChar(500)
+
+  spousesAsA         Spouse[] @relation("SpouseA")
+  spousesAsB         Spouse[] @relation("SpouseB")
+  photos             MemberPhoto[]
+  deathAnniversaries DeathAnniversary[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([familyLineId])
+  @@index([fatherId])
+  @@index([motherId])
+  @@map("members")
+}
+
+model MemberVersion {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  version   Int
+
+  fullName   String    @db.VarChar(200)
+  gender     String    @db.VarChar(10)
+  birthDate  DateTime? @db.Date
+  deathDate  DateTime? @db.Date
+  isAlive    Boolean
+  birthPlace String?   @db.VarChar(300)
+  avatarUrl  String?   @db.VarChar(500)
+  bio        String?   @db.Text
+  generation Int
+  birthOrder Int
+  fatherId   Int?
+  motherId   Int?
+  deathAnniversaryLunar String? @db.VarChar(20)
+  deathAnniversaryNote  String? @db.VarChar(500)
+
+  changedBy     Int
+  changedByName String   @db.VarChar(100)
+  changeType    String   @default("update") @db.VarChar(20)
+  createdAt     DateTime @default(now())
+
+  @@index([memberId, version])
+  @@index([memberId, createdAt])
+  @@map("member_versions")
+}
+
+model ActivityLog {
+  id         Int      @id @default(autoincrement())
+  action     String   @db.VarChar(20)
+  entityType String   @db.VarChar(20)
+  entityId   Int
+  entityName String   @db.VarChar(200)
+  snapshot   String?  @db.Text
+  userId     Int
+  userName   String   @db.VarChar(100)
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+model MemberPhoto {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  url       String   @db.VarChar(500)
+  caption   String?  @db.VarChar(500)
+  takenDate DateTime? @db.Date
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([memberId])
+  @@map("member_photos")
+}
+
+model DeathAnniversary {
+  id           Int         @id @default(autoincrement())
+  fullName     String      @db.VarChar(200)
+  lunarDate    String      @db.VarChar(20)   // e.g. "15/07"
+  note         String?     @db.VarChar(500)
+  familyLineId Int?
+  familyLine   FamilyLine? @relation(fields: [familyLineId], references: [id], onDelete: SetNull)
+  memberId     Int?
+  member       Member?     @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([familyLineId])
+  @@index([memberId])
+  @@map("death_anniversaries")
+}
+
+model ShareAccessLog {
+  id           Int        @id @default(autoincrement())
+  familyLineId Int
+  familyLine   FamilyLine @relation(fields: [familyLineId], references: [id], onDelete: Cascade)
+  ip           String?    @db.VarChar(100)
+  userAgent    String?    @db.VarChar(500)
+  referer      String?    @db.VarChar(500)
+  createdAt    DateTime   @default(now())
+
+  @@index([familyLineId])
+  @@index([createdAt])
+  @@map("share_access_logs")
+}
+
+model UserFamilyLine {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  familyLineId Int
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyLine   FamilyLine @relation(fields: [familyLineId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([userId, familyLineId])
+  @@index([userId])
+  @@index([familyLineId])
+  @@map("user_family_lines")
+}
+
+model Spouse {
+  id          Int       @id @default(autoincrement())
+  memberAId   Int
+  memberBId   Int
+  memberA     Member    @relation("SpouseA", fields: [memberAId], references: [id], onDelete: Cascade)
+  memberB     Member    @relation("SpouseB", fields: [memberBId], references: [id], onDelete: Cascade)
+  marriedDate DateTime? @db.Date
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  @@unique([memberAId, memberBId])
+  @@map("spouses")
+}

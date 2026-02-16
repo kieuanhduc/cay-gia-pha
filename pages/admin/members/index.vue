@@ -1,0 +1,153 @@
+<template>
+  <div>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">Quản lý thành viên</h1>
+      <NuxtLink v-if="canEdit" to="/admin/members/create" class="btn-primary inline-flex items-center gap-2">
+        <Icon name="ph:user-plus-bold" />
+        Thêm thành viên
+      </NuxtLink>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+      <div class="flex flex-wrap gap-3">
+        <select v-model="filters.familyLineId" class="input-field w-auto">
+          <option value="">Tất cả dòng họ</option>
+          <option v-for="fl in familyLines" :key="fl.id" :value="fl.id">{{ fl.name }}</option>
+        </select>
+        <input
+          v-model="filters.search"
+          class="input-field w-auto flex-1 min-w-[200px]"
+          placeholder="Tìm theo tên..."
+          @input="debouncedSearch"
+        />
+        <select v-model="filters.generation" class="input-field w-auto">
+          <option value="">Tất cả đời</option>
+          <option v-for="g in 10" :key="g" :value="g">Đời {{ g }}</option>
+        </select>
+      </div>
+    </div>
+
+    <LoadingSpinner v-if="pending" />
+
+    <div v-else-if="!members?.length" class="card text-center py-12">
+      <Icon name="ph:user" class="text-gray-300 text-5xl mb-3" />
+      <p class="text-gray-500">Chưa có thành viên nào</p>
+      <NuxtLink v-if="canEdit" to="/admin/members/create" class="btn-primary mt-4 inline-block">Thêm thành viên đầu tiên</NuxtLink>
+    </div>
+
+    <div v-else class="card overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100">
+            <th class="text-left py-3 px-2 font-medium text-gray-500">Họ tên</th>
+            <th class="text-left py-3 px-2 font-medium text-gray-500">Giới tính</th>
+            <th class="text-left py-3 px-2 font-medium text-gray-500">Đời</th>
+            <th class="text-left py-3 px-2 font-medium text-gray-500">Dòng họ</th>
+            <th class="text-left py-3 px-2 font-medium text-gray-500">Cha</th>
+            <th v-if="canEdit" class="text-right py-3 px-2 font-medium text-gray-500">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="m in members" :key="m.id" class="border-b border-gray-50 hover:bg-gray-50">
+            <td class="py-3 px-2">
+              <div class="flex items-center gap-2">
+                <img
+                  :src="m.avatarUrl || '/uploads/avatars/.gitkeep'"
+                  :alt="m.fullName"
+                  class="w-8 h-8 rounded-full object-cover bg-gray-200"
+                  @error="($event.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23e5e7eb%22 width=%2240%22 height=%2240%22/><text x=%2220%22 y=%2225%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2214%22>?</text></svg>'"
+                />
+                <span class="font-medium text-gray-900">{{ m.fullName }}</span>
+              </div>
+            </td>
+            <td class="py-3 px-2">
+              <span :class="m.gender === 'male' ? 'text-blue-600' : 'text-pink-600'">
+                {{ m.gender === 'male' ? 'Nam' : 'Nữ' }}
+              </span>
+            </td>
+            <td class="py-3 px-2">Đời {{ m.generation }}</td>
+            <td class="py-3 px-2 text-gray-500">{{ m.familyLine?.name }}</td>
+            <td class="py-3 px-2 text-gray-500">{{ m.father?.fullName || '—' }}</td>
+            <td v-if="canEdit" class="py-3 px-2 text-right">
+              <div class="flex items-center justify-end gap-1">
+                <NuxtLink :to="`/admin/members/${m.id}`" class="p-1.5 rounded hover:bg-gray-100 text-gray-500" title="Sửa">
+                  <Icon name="ph:pencil-simple" />
+                </NuxtLink>
+                <button @click="confirmDelete(m)" class="p-1.5 rounded hover:bg-red-50 text-red-500" title="Xóa">
+                  <Icon name="ph:trash" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-if="total > limit" class="flex justify-center mt-4 gap-2">
+        <button
+          v-for="p in Math.ceil(total / limit)"
+          :key="p"
+          @click="filters.page = p"
+          class="w-8 h-8 rounded text-sm"
+          :class="p === filters.page ? 'bg-primary-600 text-white' : 'hover:bg-gray-100 text-gray-600'"
+        >
+          {{ p }}
+        </button>
+      </div>
+    </div>
+
+    <ConfirmDialog
+      v-model="showDeleteConfirm"
+      :message="`Xóa thành viên '${deletingItem?.fullName}'?`"
+      @confirm="deleteMember"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+definePageMeta({ layout: 'admin', middleware: 'admin' })
+
+const { canEdit } = useAuth()
+const filters = ref({ familyLineId: '', search: '', generation: '', page: 1 })
+const limit = 50
+
+const { data: familyLinesData } = await useFetch('/api/family-lines')
+const familyLines = computed(() => familyLinesData.value || [])
+
+const queryParams = computed(() => {
+  const params: any = { page: filters.value.page, limit }
+  if (filters.value.familyLineId) params.familyLineId = filters.value.familyLineId
+  if (filters.value.search) params.search = filters.value.search
+  if (filters.value.generation) params.generation = filters.value.generation
+  return params
+})
+
+const { data, pending, refresh } = await useFetch<any>('/api/members', { query: queryParams })
+const members = computed(() => data.value?.members || [])
+const total = computed(() => data.value?.total || 0)
+
+let searchTimeout: ReturnType<typeof setTimeout>
+function debouncedSearch() {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => { filters.value.page = 1 }, 300)
+}
+
+const showDeleteConfirm = ref(false)
+const deletingItem = ref<any>(null)
+
+function confirmDelete(m: any) {
+  deletingItem.value = m
+  showDeleteConfirm.value = true
+}
+
+async function deleteMember() {
+  if (!deletingItem.value) return
+  try {
+    await $fetch(`/api/members/${deletingItem.value.id}`, { method: 'DELETE' })
+    showDeleteConfirm.value = false
+    deletingItem.value = null
+    await refresh()
+  } catch (e: any) {
+    alert(e.data?.message || 'Xóa thất bại')
+  }
+}
+</script>

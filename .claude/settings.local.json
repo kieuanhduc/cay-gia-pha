@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(npx nuxi@latest init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx nuxi prepare:*)",
+      "Bash(docker compose:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:icon-sets.iconify.design)",
+      "WebFetch(domain:api.iconify.design)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(ls:*)",
+      "Bash(npx nuxi typecheck:*)",
+      "Bash(npx nuxi build:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx prisma migrate deploy:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npm ls:*)"
+    ]
+  }
+}
