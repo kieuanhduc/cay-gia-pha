@@ -13,12 +13,15 @@
           </NuxtLink>
         </div>
         <div class="flex items-center gap-3">
-          <NuxtLink to="/" class="text-sm text-gray-500 hover:text-gray-700 hidden sm:block">
+          <NuxtLink to="/" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 sm:hidden" title="Xem trang chủ">
+            <Icon name="ph:eye" />
+          </NuxtLink>
+          <NuxtLink to="/" class="text-sm text-gray-500 hover:text-gray-700 hidden sm:flex items-center">
             <Icon name="ph:eye" class="mr-1" />Xem trang chủ
           </NuxtLink>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 sm:gap-2">
             <span class="text-sm text-gray-600 hidden sm:block">{{ user?.fullName }}</span>
-            <button @click="logout()" class="text-sm text-red-600 hover:text-red-700 font-medium">
+            <button @click="logout()" class="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium">
               Đăng xuất
             </button>
           </div>

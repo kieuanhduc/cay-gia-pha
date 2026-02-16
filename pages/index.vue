@@ -281,7 +281,7 @@ const features = [
   {
     icon: 'ph:database-bold',
     title: 'Sao lưu & Xuất dữ liệu',
-    desc: 'Xuất JSON, Excel, dump MySQL. Nhập dữ liệu và khôi phục từ bản sao lưu',
+    desc: 'Xuất JSON, Excel. Nhập dữ liệu và khôi phục từ bản sao lưu',
     bgColor: 'bg-amber-100',
     iconColor: 'text-amber-600',
   },

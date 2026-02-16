@@ -125,19 +125,6 @@
             <Icon name="ph:download-bold" class="mr-1" />
             {{ backingUp ? 'Đang tạo bản sao lưu...' : 'Sao lưu JSON (tất cả bảng)' }}
           </button>
-          <button
-            @click="backupSql"
-            :disabled="backingSql"
-            class="btn-secondary w-full"
-          >
-            <Icon name="ph:cylinder-bold" class="mr-1" />
-            {{ backingSql ? 'Đang dump...' : 'Dump MySQL (.sql)' }}
-          </button>
-
-          <div v-if="sqlError" class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3">
-            {{ sqlError }}
-          </div>
-
           <div class="relative">
             <div class="absolute inset-0 flex items-center">
               <div class="w-full border-t border-gray-200" />
@@ -338,28 +325,6 @@ async function backupDatabase() {
     alert(e.data?.message || 'Sao lưu thất bại')
   } finally {
     backingUp.value = false
-  }
-}
-
-const backingSql = ref(false)
-const sqlError = ref('')
-
-async function backupSql() {
-  backingSql.value = true
-  sqlError.value = ''
-  try {
-    const sql = await $fetch<string>('/api/data/backup-sql', { responseType: 'text' })
-    const blob = new Blob([sql], { type: 'application/sql' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `cay-gia-pha-${Date.now()}.sql`
-    a.click()
-    URL.revokeObjectURL(url)
-  } catch (e: any) {
-    sqlError.value = e.data?.message || 'Dump MySQL thất bại. Kiểm tra mysqldump đã cài chưa.'
-  } finally {
-    backingSql.value = false
   }
 }
 

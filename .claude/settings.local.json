@@ -19,7 +19,8 @@
       "Bash(npx prisma generate:*)",
       "Bash(npx prisma db push:*)",
       "Bash(npm ls:*)",
-      "Bash(mysqldump:*)"
+      "Bash(mysqldump:*)",
+      "Bash(brew list:*)"
     ]
   }
 }

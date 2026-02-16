@@ -25,6 +25,7 @@ let d3: any = null
 let renderTimeout: any = null
 // Store node positions for panToMember
 let nodePositions = new Map<number, { x: number; y: number }>()
+let isMobile = false
 
 function formatYears(birthDate: string | null, deathDate: string | null, isAlive: boolean) {
   const birth = birthDate ? new Date(birthDate).getFullYear() : '?'
@@ -49,11 +50,13 @@ function createNodeHtml(data: any, isHighlighted: boolean): string {
     ? `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:11px;color:#92400e;margin-top:2px;">&#8734; ${data.spouses[0].fullName}</div>`
     : ''
 
-  return `<div xmlns="http://www.w3.org/1999/xhtml" style="background:${bgColor};border:${borderWidth} solid ${borderColor};border-radius:12px;padding:10px 8px 12px;text-align:center;cursor:pointer;box-shadow:${shadow};font-family:Be Vietnam Pro,sans-serif;width:196px;box-sizing:border-box;">
-  <div xmlns="http://www.w3.org/1999/xhtml" style="width:40px;height:40px;border-radius:50%;margin:0 auto 4px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:18px;color:#9ca3af;overflow:hidden;">${data.avatarUrl ? `<img src="${data.avatarUrl}" style="width:100%;height:100%;object-fit:cover;" />` : genderSymbol}</div>
-  <div xmlns="http://www.w3.org/1999/xhtml" style="font-weight:600;font-size:13px;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${data.fullName}</div>
-  <div xmlns="http://www.w3.org/1999/xhtml" style="font-size:11px;color:#9ca3af;">${years}</div>
-  <div xmlns="http://www.w3.org/1999/xhtml" style="font-size:10px;color:#b45309;font-weight:500;">Đời ${data.generation}</div>
+  const nodeWidth = isMobile ? 156 : 196
+
+  return `<div xmlns="http://www.w3.org/1999/xhtml" style="background:${bgColor};border:${borderWidth} solid ${borderColor};border-radius:12px;padding:${isMobile ? '8px 6px 10px' : '10px 8px 12px'};text-align:center;cursor:pointer;box-shadow:${shadow};font-family:Be Vietnam Pro,sans-serif;width:${nodeWidth}px;box-sizing:border-box;">
+  <div xmlns="http://www.w3.org/1999/xhtml" style="width:${isMobile ? 32 : 40}px;height:${isMobile ? 32 : 40}px;border-radius:50%;margin:0 auto 4px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:${isMobile ? 14 : 18}px;color:#9ca3af;overflow:hidden;">${data.avatarUrl ? `<img src="${data.avatarUrl}" style="width:100%;height:100%;object-fit:cover;" />` : genderSymbol}</div>
+  <div xmlns="http://www.w3.org/1999/xhtml" style="font-weight:600;font-size:${isMobile ? 11 : 13}px;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${data.fullName}</div>
+  <div xmlns="http://www.w3.org/1999/xhtml" style="font-size:${isMobile ? 10 : 11}px;color:#9ca3af;">${years}</div>
+  <div xmlns="http://www.w3.org/1999/xhtml" style="font-size:${isMobile ? 9 : 10}px;color:#b45309;font-weight:500;">Đời ${data.generation}</div>
   ${spouseHtml}
 </div>`
 }
@@ -63,6 +66,7 @@ async function renderTree() {
 
   const width = containerRef.value.offsetWidth || containerRef.value.clientWidth || 800
   const height = containerRef.value.offsetHeight || containerRef.value.clientHeight || 600
+  isMobile = width < 640
 
   if (width < 10 || height < 10) {
     renderTimeout = setTimeout(() => renderTree(), 100)
@@ -105,7 +109,9 @@ async function renderTree() {
   const root = d3.hierarchy(treeData, (d: any) => d.children)
 
   const isVertical = props.direction === 'vertical'
-  const spacing: [number, number] = isVertical ? [220, 240] : [200, 280]
+  const spacing: [number, number] = isMobile
+    ? (isVertical ? [170, 200] : [160, 220])
+    : (isVertical ? [220, 240] : [200, 280])
 
   const treeLayout = d3.tree()
     .nodeSize(spacing)
@@ -147,10 +153,11 @@ async function renderTree() {
     .style('cursor', 'pointer')
 
   // foreignObject
+  const foW = isMobile ? 160 : 200
   const fo = nodeGroups.append('foreignObject')
-    .attr('width', 200)
+    .attr('width', foW)
     .attr('height', 180)
-    .attr('x', -100)
+    .attr('x', -foW / 2)
     .attr('y', -50)
     .attr('overflow', 'visible')
 

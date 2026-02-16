@@ -1,63 +1,102 @@
 <template>
   <div class="h-screen flex flex-col">
     <!-- Header bar -->
-    <div class="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between shrink-0">
-      <div class="flex items-center gap-3">
-        <NuxtLink to="/" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500">
-          <Icon name="ph:arrow-left-bold" />
-        </NuxtLink>
-        <div>
-          <h1 class="text-lg font-bold text-gray-900">{{ treeData?.familyLine?.name || 'Cây Gia Phả' }}</h1>
-          <p class="text-xs text-gray-500">{{ treeData?.totalMembers || 0 }} thành viên</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <!-- Search -->
-        <div class="relative hidden sm:block">
-          <input
-            v-model="searchQuery"
-            class="input-field pl-8 py-1.5 text-sm w-48"
-            placeholder="Tìm thành viên..."
-            @input="onSearch"
-            @keydown.enter="selectSearchResult"
-          />
-          <Icon name="ph:magnifying-glass" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-
-          <!-- Search results dropdown -->
-          <div
-            v-if="searchResults.length > 0 && searchQuery.length > 0"
-            class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
-          >
-            <button
-              v-for="(result, i) in searchResults"
-              :key="result.id"
-              class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 transition-colors flex items-center gap-2"
-              :class="i === selectedSearchIndex ? 'bg-primary-50' : ''"
-              @click="goToMember(result.id)"
-            >
-              <span :class="result.gender === 'male' ? 'text-blue-500' : 'text-pink-500'" class="text-xs">
-                {{ result.gender === 'male' ? '♂' : '♀' }}
-              </span>
-              <span>{{ result.fullName }}</span>
-              <span class="text-gray-400 text-xs ml-auto">Đời {{ result.generation }}</span>
-            </button>
+    <div class="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 shrink-0">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+          <NuxtLink to="/" class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 text-gray-500 shrink-0">
+            <Icon name="ph:arrow-left-bold" />
+          </NuxtLink>
+          <div class="min-w-0">
+            <h1 class="text-sm sm:text-lg font-bold text-gray-900 truncate">{{ treeData?.familyLine?.name || 'Cây Gia Phả' }}</h1>
+            <p class="text-xs text-gray-500">{{ treeData?.totalMembers || 0 }} thành viên</p>
           </div>
         </div>
 
-        <TreeControls
-          :direction="direction"
-          :exporting="exporting"
-          :can-share="canEdit"
-          :is-shared="!!treeData?.familyLine?.isPublic"
-          @update:direction="direction = $event"
-          @zoom-in="handleZoomIn"
-          @zoom-out="handleZoomOut"
-          @fit="handleFit"
-          @open-export="showExportDialog = true"
-          @find-relationship="showFindRelationship = true"
-          @share="showShareDialog = true"
+        <div class="flex items-center gap-1 sm:gap-3 shrink-0">
+          <!-- Search toggle (mobile) -->
+          <button @click="showMobileSearch = !showMobileSearch" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 sm:hidden">
+            <Icon name="ph:magnifying-glass" />
+          </button>
+
+          <!-- Search (desktop) -->
+          <div class="relative hidden sm:block">
+            <input
+              v-model="searchQuery"
+              class="input-field pl-8 py-1.5 text-sm w-48"
+              placeholder="Tìm thành viên..."
+              @input="onSearch"
+              @keydown.enter="selectSearchResult"
+            />
+            <Icon name="ph:magnifying-glass" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+
+            <!-- Search results dropdown -->
+            <div
+              v-if="searchResults.length > 0 && searchQuery.length > 0"
+              class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
+            >
+              <button
+                v-for="(result, i) in searchResults"
+                :key="result.id"
+                class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 transition-colors flex items-center gap-2"
+                :class="i === selectedSearchIndex ? 'bg-primary-50' : ''"
+                @click="goToMember(result.id)"
+              >
+                <span :class="result.gender === 'male' ? 'text-blue-500' : 'text-pink-500'" class="text-xs">
+                  {{ result.gender === 'male' ? '♂' : '♀' }}
+                </span>
+                <span>{{ result.fullName }}</span>
+                <span class="text-gray-400 text-xs ml-auto">Đời {{ result.generation }}</span>
+              </button>
+            </div>
+          </div>
+
+          <TreeControls
+            :direction="direction"
+            :exporting="exporting"
+            :can-share="canEdit"
+            :is-shared="!!treeData?.familyLine?.isPublic"
+            @update:direction="direction = $event"
+            @zoom-in="handleZoomIn"
+            @zoom-out="handleZoomOut"
+            @fit="handleFit"
+            @open-export="showExportDialog = true"
+            @find-relationship="showFindRelationship = true"
+            @share="showShareDialog = true"
+          />
+        </div>
+      </div>
+
+      <!-- Mobile search bar -->
+      <div v-if="showMobileSearch" class="mt-2 sm:hidden relative">
+        <input
+          v-model="searchQuery"
+          class="input-field pl-8 py-2 text-sm w-full"
+          placeholder="Tìm thành viên..."
+          @input="onSearch"
+          @keydown.enter="selectSearchResult"
+          ref="mobileSearchInput"
         />
+        <Icon name="ph:magnifying-glass" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+
+        <div
+          v-if="searchResults.length > 0 && searchQuery.length > 0"
+          class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
+        >
+          <button
+            v-for="(result, i) in searchResults"
+            :key="result.id"
+            class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 transition-colors flex items-center gap-2"
+            :class="i === selectedSearchIndex ? 'bg-primary-50' : ''"
+            @click="goToMember(result.id); showMobileSearch = false"
+          >
+            <span :class="result.gender === 'male' ? 'text-blue-500' : 'text-pink-500'" class="text-xs">
+              {{ result.gender === 'male' ? '♂' : '♀' }}
+            </span>
+            <span>{{ result.fullName }}</span>
+            <span class="text-gray-400 text-xs ml-auto">Đời {{ result.generation }}</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -180,6 +219,12 @@ const showFindRelationship = ref(false)
 const showShareDialog = ref(false)
 const showQuickShare = ref(false)
 const copied = ref(false)
+const showMobileSearch = ref(false)
+const mobileSearchInput = ref<HTMLInputElement | null>(null)
+
+watch(showMobileSearch, (val) => {
+  if (val) nextTick(() => mobileSearchInput.value?.focus())
+})
 
 function getTree() {
   return treeRef.value

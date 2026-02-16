@@ -268,6 +268,23 @@ export function useTreeExport() {
     </div>`
   }
 
+  /** Pre-convert all avatar URLs in tree data to base64 */
+  async function preloadAvatars(nodes: TreeNode[]): Promise<void> {
+    const promises: Promise<void>[] = []
+    function walk(n: TreeNode) {
+      if (n.avatarUrl && !n.avatarUrl.startsWith('data:')) {
+        promises.push(
+          toBase64(n.avatarUrl).then(dataUrl => {
+            n.avatarUrl = dataUrl || null
+          })
+        )
+      }
+      n.children?.forEach(walk)
+    }
+    nodes.forEach(walk)
+    await Promise.all(promises)
+  }
+
   async function exportTree(
     _svgEl: SVGSVGElement,
     familyName: string,
@@ -276,10 +293,14 @@ export function useTreeExport() {
     exporting.value = true
 
     try {
+      // 0. Pre-convert avatars to base64 to avoid tainted canvas
+      const treeDataClone: TreeNode[] = JSON.parse(JSON.stringify(treeDataArray))
+      await preloadAvatars(treeDataClone)
+
       // 1. Compute tree layout from data (independent of current SVG)
       const nodeW = 192
       const nodeH = 130
-      const layout = layoutTree(treeDataArray)
+      const layout = layoutTree(treeDataClone)
 
       // 2. Dimensions
       const framePad = 75
@@ -293,8 +314,8 @@ export function useTreeExport() {
       const totalW = Math.max(contentW + framePad * 2, 900)
       const totalH = contentH + headerH + footerH + framePad * 2
 
-      const totalGens = countGenerations(treeDataArray)
-      const totalMems = countMembers(treeDataArray)
+      const totalGens = countGenerations(treeDataClone)
+      const totalMems = countMembers(treeDataClone)
       const today = new Date()
       const dateStr = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`
 
@@ -419,6 +440,22 @@ export function useTreeExport() {
     }
   }
 
+  /** Convert an image URL to a base64 data URL */
+  async function toBase64(url: string): Promise<string> {
+    try {
+      const resp = await fetch(url)
+      const blob = await resp.blob()
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
+    } catch {
+      return ''
+    }
+  }
+
   async function exportTreeAsPdf(
     svgEl: SVGSVGElement,
     options: PdfExportOptions,
@@ -426,32 +463,12 @@ export function useTreeExport() {
     exporting.value = true
 
     try {
-      // 1. Clone the SVG element
-      const clonedSvg = svgEl.cloneNode(true) as SVGSVGElement
-
-      // 2. Get the bounding box of the content group (first `g` child)
+      // 1. Get bounding box of tree content
       const originalG = svgEl.querySelector('g')
       if (!originalG) throw new Error('Không tìm thấy nội dung cây gia phả')
       const bbox = originalG.getBBox()
 
-      // 3. Set viewBox to fit all content with padding
-      const padding = 60
-      const vbX = bbox.x - padding
-      const vbY = bbox.y - padding
-      const vbW = bbox.width + padding * 2
-      const vbH = bbox.height + padding * 2
-
-      clonedSvg.setAttribute('viewBox', `${vbX} ${vbY} ${vbW} ${vbH}`)
-      clonedSvg.removeAttribute('width')
-      clonedSvg.removeAttribute('height')
-
-      // Remove any transform on the main g to reset zoom/pan
-      const clonedG = clonedSvg.querySelector('g')
-      if (clonedG) {
-        clonedG.removeAttribute('transform')
-      }
-
-      // 4. Paper sizes in mm
+      // 2. Paper sizes in mm
       const paperSizes: Record<string, [number, number]> = {
         a4: [210, 297],
         a3: [297, 420],
@@ -462,76 +479,67 @@ export function useTreeExport() {
       const pageW = isLandscape ? paperH : paperW
       const pageH = isLandscape ? paperW : paperH
 
-      // Pixel ratio based on quality
       const pixelRatio = options.quality === 'high' ? 3 : 2
-      // Convert mm to pixels at 96 DPI (1mm = 3.7795px), then multiply by ratio
       const mmToPx = 3.7795
-      const canvasW = Math.round(pageW * mmToPx * pixelRatio)
-      const canvasH = Math.round(pageH * mmToPx * pixelRatio)
 
-      // Margins in mm
+      // Margins
       const marginMm = 15
       const headerHeightMm = 20
       const contentMarginTop = marginMm + headerHeightMm
       const availW = pageW - marginMm * 2
       const availH = pageH - contentMarginTop - marginMm
 
-      // 5. Set cloned SVG size to fill available area proportionally
+      // 3. Calculate render size to fit tree into available area
+      const padding = 60
+      const vbW = bbox.width + padding * 2
+      const vbH = bbox.height + padding * 2
       const svgAspect = vbW / vbH
       const availAspect = availW / availH
       let renderW: number, renderH: number
       if (svgAspect > availAspect) {
-        // SVG is wider - fit to width
         renderW = availW
         renderH = availW / svgAspect
       } else {
-        // SVG is taller - fit to height
         renderH = availH
         renderW = availH * svgAspect
       }
 
-      // Set SVG dimensions in mm for rendering
       const renderWPx = Math.round(renderW * mmToPx * pixelRatio)
       const renderHPx = Math.round(renderH * mmToPx * pixelRatio)
+
+      // 4. Create a temporary wrapper with the SVG clone, reset transform and set viewBox
+      const clonedSvg = svgEl.cloneNode(true) as SVGSVGElement
+      const clonedG = clonedSvg.querySelector('g')
+      if (clonedG) clonedG.removeAttribute('transform')
+
+      const vbX = bbox.x - padding
+      const vbY = bbox.y - padding
+      clonedSvg.setAttribute('viewBox', `${vbX} ${vbY} ${vbW} ${vbH}`)
       clonedSvg.setAttribute('width', String(renderWPx))
       clonedSvg.setAttribute('height', String(renderHPx))
-      clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-      clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+      clonedSvg.style.width = `${renderWPx}px`
+      clonedSvg.style.height = `${renderHPx}px`
 
-      // 6. Serialize SVG and convert to image via canvas
-      const serializer = new XMLSerializer()
-      const svgString = serializer.serializeToString(clonedSvg)
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
-      const svgUrl = URL.createObjectURL(svgBlob)
+      // Place offscreen for html-to-image to capture
+      const wrapper = document.createElement('div')
+      wrapper.style.cssText = `position:fixed;left:-99999px;top:0;width:${renderWPx}px;height:${renderHPx}px;background:#ffffff;`
+      wrapper.appendChild(clonedSvg)
+      document.body.appendChild(wrapper)
 
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
+      await new Promise(r => setTimeout(r, 300))
 
-      const imageLoaded = new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve()
-        img.onerror = () => reject(new Error('Không thể tạo ảnh từ cây gia phả'))
+      // 5. Use html-to-image (handles CORS/foreignObject correctly)
+      const imgDataUrl = await toPng(wrapper, {
+        pixelRatio: 1,
+        backgroundColor: '#FFFFFF',
+        width: renderWPx,
+        height: renderHPx,
+        style: { position: 'static', left: 'auto', top: 'auto' },
       })
 
-      img.src = svgUrl
+      document.body.removeChild(wrapper)
 
-      await imageLoaded
-
-      const canvas = document.createElement('canvas')
-      canvas.width = renderWPx
-      canvas.height = renderHPx
-      const ctx = canvas.getContext('2d')
-      if (!ctx) throw new Error('Không thể tạo canvas context')
-
-      // White background
-      ctx.fillStyle = '#FFFFFF'
-      ctx.fillRect(0, 0, renderWPx, renderHPx)
-      ctx.drawImage(img, 0, 0, renderWPx, renderHPx)
-
-      URL.revokeObjectURL(svgUrl)
-
-      const imgDataUrl = canvas.toDataURL('image/png', 1.0)
-
-      // 7. Create jsPDF
+      // 6. Create jsPDF
       const { jsPDF } = await import('jspdf')
       const pdf = new jsPDF({
         orientation: options.orientation === 'landscape' ? 'l' : 'p',
@@ -539,26 +547,24 @@ export function useTreeExport() {
         format: options.paperSize,
       })
 
-      // 8. Add title and date at top
-      const title = 'Cây Gia Phả'
+      // 7. Title and date
       const today = new Date()
       const dateStr = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`
 
       pdf.setFontSize(16)
-      pdf.setTextColor(92, 46, 14) // #5C2E0E
-      pdf.text(title, pageW / 2, marginMm + 6, { align: 'center' })
+      pdf.setTextColor(92, 46, 14)
+      pdf.text('Cây Gia Phả', pageW / 2, marginMm + 6, { align: 'center' })
 
       pdf.setFontSize(9)
-      pdf.setTextColor(160, 128, 80) // #A08050
+      pdf.setTextColor(160, 128, 80)
       pdf.text(`Ngày xuất: ${dateStr}`, pageW / 2, marginMm + 12, { align: 'center' })
 
-      // 9. Add image to PDF, centered in available area
+      // 8. Add image centered
       const imgX = marginMm + (availW - renderW) / 2
       const imgY = contentMarginTop + (availH - renderH) / 2
-
       pdf.addImage(imgDataUrl, 'PNG', imgX, imgY, renderW, renderH)
 
-      // 10. Save PDF
+      // 9. Save
       pdf.save(`cay-gia-pha-${options.paperSize}-${options.orientation}.pdf`)
 
     } catch (err) {
