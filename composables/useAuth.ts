@@ -28,7 +28,18 @@ export const useAuth = () => {
 
   async function fetchUser() {
     try {
-      const data = await $fetch('/api/auth/me')
+      const headers: Record<string, string> = {}
+
+      // Forward cookies when running on server (SSR)
+      if (import.meta.server) {
+        const event = useRequestEvent()
+        const cookie = event?.node?.req?.headers?.cookie
+        if (cookie) {
+          headers.cookie = cookie
+        }
+      }
+
+      const data = await $fetch('/api/auth/me', { headers })
       user.value = data.user
     } catch {
       user.value = null
