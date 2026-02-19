@@ -180,9 +180,10 @@ const bulkDeleting = ref(false)
 async function doBulkDelete() {
   bulkDeleting.value = true
   try {
-    for (const id of selectedIds.value) {
-      await $fetch(`/api/posts/${id}`, { method: 'DELETE' })
-    }
+    await $fetch('/api/posts/bulk-delete', {
+      method: 'DELETE',
+      body: { ids: selectedIds.value },
+    })
     showBulkDeleteConfirm.value = false
     selectedIds.value = []
     await refresh()

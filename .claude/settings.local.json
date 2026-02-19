@@ -33,7 +33,9 @@
       "WebFetch(domain:supabase.com)",
       "WebFetch(domain:news.ycombinator.com)",
       "Bash(npx prisma migrate:*)",
-      "Bash(npx prisma migrate resolve:*)"
+      "Bash(npx prisma migrate resolve:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(npm run seed:content:*)"
     ]
   }
 }

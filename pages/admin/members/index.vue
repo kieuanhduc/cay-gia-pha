@@ -214,9 +214,10 @@ async function bulkDelete() {
   if (selectedIds.value.length === 0) return
   bulkDeleting.value = true
   try {
-    for (const id of selectedIds.value) {
-      await $fetch(`/api/members/${id}`, { method: 'DELETE' })
-    }
+    await $fetch('/api/members/bulk-delete', {
+      method: 'DELETE',
+      body: { ids: selectedIds.value },
+    })
     showBulkDeleteConfirm.value = false
     selectedIds.value = []
     await refresh()

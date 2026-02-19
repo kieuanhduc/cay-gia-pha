@@ -91,6 +91,7 @@
     <ConfirmDialog
       v-model="showDeleteConfirm"
       :message="`Xóa dòng họ '${deletingItem?.name}' và tất cả thành viên trong đó?`"
+      :loading="deleting"
       @confirm="deleteFamilyLine"
     />
 
@@ -159,6 +160,7 @@ const saving = ref(false)
 
 const showDeleteConfirm = ref(false)
 const deletingItem = ref<any>(null)
+const deleting = ref(false)
 
 const showShareDialog = ref(false)
 const sharingItem = ref<any>(null)
@@ -206,6 +208,7 @@ async function saveFamilyLine() {
 
 async function deleteFamilyLine() {
   if (!deletingItem.value) return
+  deleting.value = true
   try {
     await $fetch(`/api/family-lines/${deletingItem.value.id}`, { method: 'DELETE' })
     showDeleteConfirm.value = false
@@ -213,6 +216,8 @@ async function deleteFamilyLine() {
     await refresh()
   } catch (e: any) {
     alert(e.data?.message || 'Xóa thất bại')
+  } finally {
+    deleting.value = false
   }
 }
 
