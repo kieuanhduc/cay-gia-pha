@@ -108,7 +108,10 @@
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 
 const { canEdit, isAdmin } = useAuth()
-const { data: familyLines, pending, refresh } = await useFetch<any[]>('/api/family-lines')
+const nuxtApp = useNuxtApp()
+const { data: familyLines, pending, refresh } = useLazyFetch<any[]>('/api/family-lines', {
+  getCachedData: (key) => nuxtApp.payload.data[key] as any,
+})
 
 const shareInfoMap = ref<Record<number, { userName: string; createdAt: string }>>({})
 
@@ -146,7 +149,7 @@ async function loadShareInfo() {
   shareInfoMap.value = map
 }
 
-watch(familyLines, () => loadShareInfo(), { immediate: true })
+// loadShareInfo chỉ gọi khi cần (không auto-call để tránh N+1 requests khi load trang)
 
 const showForm = ref(false)
 const editingId = ref<number | null>(null)

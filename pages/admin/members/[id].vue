@@ -83,7 +83,7 @@ const id = route.params.id
 
 const defaultAvatar = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23e5e7eb" width="100" height="100" rx="50"/><circle cx="50" cy="40" r="18" fill="%239ca3af"/><path d="M10 95c0-22 18-40 40-40s40 18 40 40" fill="%239ca3af"/></svg>`
 
-const { data: member, pending, refresh } = await useFetch<any>(`/api/members/${id}`)
+const { data: member, pending, refresh } = useLazyFetch<any>(`/api/members/${id}`)
 
 async function uploadAvatar(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]

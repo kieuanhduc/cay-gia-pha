@@ -1,4 +1,3 @@
-import prisma from '~/server/utils/prisma'
 import { getTokenFromEvent, verifyToken } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
@@ -9,16 +8,16 @@ export default defineEventHandler(async (event) => {
 
   try {
     const payload = verifyToken(token)
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-      select: { id: true, username: true, fullName: true, email: true, role: true },
-    })
-
-    if (!user) {
-      throw createError({ statusCode: 401, message: 'Người dùng không tồn tại' })
+    // Return directly from verified JWT — no DB query needed
+    // fullName falls back to username for tokens issued before this change
+    return {
+      user: {
+        id: payload.userId,
+        username: payload.username,
+        fullName: payload.fullName || payload.username,
+        role: payload.role,
+      },
     }
-
-    return { user }
   } catch {
     throw createError({ statusCode: 401, message: 'Phiên đăng nhập hết hạn' })
   }

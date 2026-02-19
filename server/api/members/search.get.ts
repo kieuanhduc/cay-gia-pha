@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   const where: any = {}
 
   if (q) {
-    where.fullName = { contains: q }
+    where.fullName = { contains: q, mode: 'insensitive' }
   }
 
   if (gender === 'male' || gender === 'female') {
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (birthPlace) {
-    where.birthPlace = { contains: birthPlace }
+    where.birthPlace = { contains: birthPlace, mode: 'insensitive' }
   }
 
   if (isAlive === 'true') {

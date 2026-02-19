@@ -85,7 +85,10 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 
-const { data: familyLinesData } = await useFetch<any[]>('/api/family-lines')
+const nuxtApp = useNuxtApp()
+const { data: familyLinesData } = useLazyFetch<any[]>('/api/family-lines', {
+  getCachedData: (key) => nuxtApp.payload.data[key] as any,
+})
 const familyLines = computed(() => familyLinesData.value || [])
 
 const filterFamilyLine = ref('')

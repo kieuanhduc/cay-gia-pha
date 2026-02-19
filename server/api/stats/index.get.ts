@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     aliveCount,
     deceasedCount,
     total,
-    membersWithBirth,
+    ageDistributionRaw,
   ] = await Promise.all([
     prisma.member.groupBy({
       by: ['generation'],
@@ -32,10 +32,22 @@ export default defineEventHandler(async (event) => {
     prisma.member.count({ where: { isAlive: true } }),
     prisma.member.count({ where: { isAlive: false } }),
     prisma.member.count(),
-    prisma.member.findMany({
-      where: { birthDate: { not: null } },
-      select: { birthDate: true },
-    }),
+    // Compute age distribution at DB level instead of fetching all rows
+    // Column is camelCase "birthDate" (no @map in schema)
+    prisma.$queryRaw<{ range: string; count: bigint }[]>`
+      SELECT
+        CASE
+          WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, "birthDate")) <= 20 THEN '0-20'
+          WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, "birthDate")) <= 40 THEN '21-40'
+          WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, "birthDate")) <= 60 THEN '41-60'
+          WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, "birthDate")) <= 80 THEN '61-80'
+          ELSE '80+'
+        END as range,
+        COUNT(*) as count
+      FROM members
+      WHERE "birthDate" IS NOT NULL
+      GROUP BY 1
+    `,
   ])
 
   // Build byFamilyLine
@@ -54,34 +66,12 @@ export default defineEventHandler(async (event) => {
     genderMap[g.gender] = g._count
   }
 
-  // Build age distribution
-  const now = new Date()
-  const buckets: Record<string, number> = {
-    '0-20': 0,
-    '21-40': 0,
-    '41-60': 0,
-    '61-80': 0,
-    '80+': 0,
-  }
-
-  for (const m of membersWithBirth) {
-    if (!m.birthDate) continue
-    const birth = new Date(m.birthDate)
-    let age = now.getFullYear() - birth.getFullYear()
-    const monthDiff = now.getMonth() - birth.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
-      age--
-    }
-    if (age <= 20) buckets['0-20']++
-    else if (age <= 40) buckets['21-40']++
-    else if (age <= 60) buckets['41-60']++
-    else if (age <= 80) buckets['61-80']++
-    else buckets['80+']++
-  }
-
-  const ageDistribution = Object.entries(buckets).map(([range, count]) => ({
+  // Map raw age distribution result (preserve fixed order)
+  const bucketOrder = ['0-20', '21-40', '41-60', '61-80', '80+']
+  const bucketMap = new Map(ageDistributionRaw.map((r) => [r.range, Number(r.count)]))
+  const ageDistribution = bucketOrder.map((range) => ({
     range,
-    count,
+    count: bucketMap.get(range) ?? 0,
   }))
 
   return {

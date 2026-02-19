@@ -14,17 +14,21 @@ export default defineEventHandler(async (event) => {
     where,
     include: {
       _count: { select: { members: true } },
-      members: { select: { generation: true } },
+      // Fetch only 1 member with highest generation instead of all members
+      members: {
+        select: { generation: true },
+        orderBy: { generation: 'desc' },
+        take: 1,
+      },
     },
     orderBy: { createdAt: 'desc' },
   })
 
   return familyLines.map((fl) => {
-    const generations = fl.members.map((m) => m.generation).filter(Boolean)
     return {
       ...fl,
       memberCount: fl._count.members,
-      maxGeneration: generations.length ? Math.max(...generations) : 0,
+      maxGeneration: fl.members[0]?.generation ?? 0,
       _count: undefined,
       members: undefined,
     }

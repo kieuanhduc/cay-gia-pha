@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
   const token = signToken({
     userId: user.id,
     username: user.username,
+    fullName: user.fullName,
     role: user.role,
   })
 

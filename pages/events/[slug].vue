@@ -40,7 +40,7 @@
 const route = useRoute()
 const slug = route.params.slug as string
 
-const { data: listData, pending } = await useFetch<any>('/api/posts', {
+const { data: listData, pending } = useLazyFetch<any>('/api/posts', {
   query: { type: 'event', published: 'true', limit: 1000 },
 })
 

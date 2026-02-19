@@ -4,7 +4,7 @@
       <!-- Member A select -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Chọn thành viên A</label>
-        <div class="relative">
+        <div class="relative" @click.stop>
           <input
             v-model="searchA"
             class="input-field w-full pl-8"
@@ -41,7 +41,7 @@
       <!-- Member B select -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Chọn thành viên B</label>
-        <div class="relative">
+        <div class="relative" @click.stop>
           <input
             v-model="searchB"
             class="input-field w-full pl-8"

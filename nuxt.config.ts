@@ -38,7 +38,17 @@ export default defineNuxtConfig({
   },
 
   icon: {
-    serverBundle: 'remote',
+    serverBundle: {
+      collections: ['ph'],
+    },
+    clientBundle: {
+      scan: true,
+      sizeLimitKb: 256,
+    },
+  },
+
+  nitro: {
+    compressPublicAssets: true,
   },
 
   compatibilityDate: '2025-01-01',

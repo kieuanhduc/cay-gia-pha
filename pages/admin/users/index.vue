@@ -172,8 +172,11 @@ interface User {
   updatedAt: string
 }
 
-const { data: users, pending, refresh } = await useFetch<User[]>('/api/users')
-const { data: familyLines } = await useFetch<any[]>('/api/family-lines')
+const { data: users, pending, refresh } = useLazyFetch<User[]>('/api/users')
+const nuxtApp = useNuxtApp()
+const { data: familyLines } = useLazyFetch<any[]>('/api/family-lines', {
+  getCachedData: (key) => nuxtApp.payload.data[key] as any,
+})
 
 const showForm = ref(false)
 const editingId = ref<number | null>(null)

@@ -16,7 +16,7 @@
 <script setup lang="ts">
 useHead({ title: 'Giới thiệu - Cây Gia Phả' })
 
-const { data, pending } = await useFetch<any>('/api/site-content/about')
+const { data, pending } = useLazyFetch<any>('/api/site-content/about')
 const content = computed(() => data.value?.content || '')
 </script>
 

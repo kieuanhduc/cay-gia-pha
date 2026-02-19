@@ -26,6 +26,8 @@ let renderTimeout: any = null
 // Store node positions for panToMember
 let nodePositions = new Map<number, { x: number; y: number }>()
 let isMobile = false
+// Track previous highlight to avoid full-tree re-render on highlight change
+let prevHighlightId: number | null = null
 
 function formatYears(birthDate: string | null, deathDate: string | null, isAlive: boolean) {
   const birth = birthDate ? new Date(birthDate).getFullYear() : '?'
@@ -83,6 +85,7 @@ async function renderTree() {
   const svg = d3.select(svgRef.value)
   svg.selectAll('*').remove()
   nodePositions = new Map()
+  prevHighlightId = null
 
   // Setup zoom
   zoomBehavior = d3.zoom()
@@ -207,20 +210,13 @@ function panToMember(memberId: number) {
   const w = containerRef.value.offsetWidth
   const h = containerRef.value.offsetHeight
 
-  // Pan and zoom to center on the member
+  // Pan only — highlight is handled by the highlightId prop watcher
   svg.transition().duration(600).call(
     zoomBehavior.transform,
     d3.zoomIdentity
       .translate(w / 2 - pos.x, h / 2 - pos.y)
       .scale(1)
   )
-
-  // Update highlight on the node
-  svg.selectAll('.node foreignObject').each(function (this: any, d: any) {
-    const foEl = this as Element
-    const isHighlighted = d.data.id === memberId
-    foEl.innerHTML = createNodeHtml(d.data, isHighlighted)
-  })
 }
 
 function zoomIn() {
@@ -273,15 +269,24 @@ onBeforeUnmount(() => {
 watch(() => [props.data, props.direction], () => {
   if (renderTimeout) clearTimeout(renderTimeout)
   renderTree()
-}, { deep: true })
+})
 
-watch(() => props.highlightId, (id) => {
+watch(() => props.highlightId, (newId) => {
   if (!svgRef.value || !d3) return
   const svg = d3.select(svgRef.value)
+
+  // Only update the 2 affected nodes (previous + new) instead of all nodes
+  const idsToUpdate = new Set<number>()
+  if (prevHighlightId != null) idsToUpdate.add(prevHighlightId)
+  if (newId != null) idsToUpdate.add(newId)
+  if (idsToUpdate.size === 0) return
+
   svg.selectAll('.node foreignObject').each(function (this: any, d: any) {
-    const foEl = this as Element
-    const isHighlighted = id != null && d.data.id === id
-    foEl.innerHTML = createNodeHtml(d.data, isHighlighted)
+    if (idsToUpdate.has(d.data.id)) {
+      const foEl = this as Element
+      foEl.innerHTML = createNodeHtml(d.data, d.data.id === newId)
+    }
   })
+  prevHighlightId = newId ?? null
 })
 </script>

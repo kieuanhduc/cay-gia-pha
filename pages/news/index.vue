@@ -57,7 +57,7 @@ useHead({ title: 'Tin tức - Cây Gia Phả' })
 const page = ref(1)
 const limit = 9
 
-const { data, pending } = await useFetch<any>('/api/posts', {
+const { data, pending } = useLazyFetch<any>('/api/posts', {
   query: computed(() => ({ type: 'news', published: 'true', page: page.value, limit })),
 })
 

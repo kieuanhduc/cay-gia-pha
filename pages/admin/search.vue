@@ -69,11 +69,8 @@ const filters = ref({
 const currentPage = ref(1)
 const limit = 20
 
-const queryParams = computed(() => {
-  const params: Record<string, any> = {
-    page: currentPage.value,
-    limit,
-  }
+function buildQuery() {
+  const params: Record<string, any> = { page: currentPage.value, limit }
   const f = filters.value
   if (f.q) params.q = f.q
   if (f.gender) params.gender = f.gender
@@ -85,11 +82,13 @@ const queryParams = computed(() => {
   if (f.familyLineId) params.familyLineId = f.familyLineId
   if (f.hasAnniversary) params.hasAnniversary = f.hasAnniversary
   return params
-})
+}
 
-const { data, pending: loading, refresh } = await useFetch<any>('/api/members/search', {
-  query: queryParams,
-})
+const { data, pending: loading, refresh } = useLazyAsyncData(
+  'admin-members-search',
+  () => $fetch<any>('/api/members/search', { query: buildQuery() }),
+  { watch: false }
+)
 
 const members = computed(() => data.value?.members || [])
 const total = computed(() => data.value?.total || 0)
@@ -119,11 +118,13 @@ const displayedPages = computed(() => {
 
 function doSearch() {
   currentPage.value = 1
+  refresh()
 }
 
 function goToPage(page: number) {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
+  refresh()
 }
 
 function goToMember(member: any) {

@@ -72,7 +72,7 @@
 <script setup lang="ts">
 useHead({ title: 'Liên hệ - Cây Gia Phả' })
 
-const { data: contactData } = await useFetch<any>('/api/site-content/contact_info')
+const { data: contactData } = useLazyFetch<any>('/api/site-content/contact_info')
 const contactInfo = reactive({ address: '', phone: '', email: '', hours: '' })
 try {
   const parsed = JSON.parse(contactData.value?.content || '{}')

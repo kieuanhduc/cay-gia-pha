@@ -55,7 +55,7 @@
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 
 // About content
-const { data: aboutData } = await useFetch<any>('/api/site-content/about')
+const { data: aboutData } = useLazyFetch<any>('/api/site-content/about')
 const aboutContent = ref(aboutData.value?.content || '')
 const savingAbout = ref(false)
 const savedAbout = ref(false)
@@ -75,7 +75,7 @@ async function saveAbout() {
 }
 
 // Contact info (stored as JSON string)
-const { data: contactData } = await useFetch<any>('/api/site-content/contact_info')
+const { data: contactData } = useLazyFetch<any>('/api/site-content/contact_info')
 const defaultContact = { address: '', phone: '', email: '', hours: '' }
 const contactInfo = reactive({ ...defaultContact })
 

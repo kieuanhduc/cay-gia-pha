@@ -320,9 +320,12 @@
 <script setup lang="ts">
 const { isLoggedIn } = useAuth()
 
-// Chỉ fetch family lines khi đã login
-const { data: familyLines, pending } = isLoggedIn.value 
-  ? await useFetch<any[]>('/api/family-lines')
+// Chỉ fetch family lines khi đã login — lazy để không block navigation, cache để tránh refetch
+const nuxtApp = useNuxtApp()
+const { data: familyLines, pending } = isLoggedIn.value
+  ? useLazyFetch<any[]>('/api/family-lines', {
+      getCachedData: (key) => nuxtApp.payload.data[key] as any,
+    })
   : { data: ref([]), pending: ref(false) }
 
 // Lazy load để không block SSR

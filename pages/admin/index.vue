@@ -53,14 +53,14 @@ definePageMeta({ layout: 'admin', middleware: 'admin' })
 
 const stats = ref({ familyLines: 0, members: 0, generations: 0 })
 
-const { data: familyLines } = await useFetch('/api/family-lines')
-const { data: members } = await useFetch('/api/members')
+// Dùng /api/stats thay vì fetch members thủ công, lazy để không block navigation
+const { data: statsData } = useLazyFetch('/api/stats')
 
 watchEffect(() => {
-  stats.value.familyLines = familyLines.value?.length || 0
-  stats.value.members = members.value?.members?.length || 0
-  if (members.value?.members?.length) {
-    stats.value.generations = Math.max(...members.value.members.map((m: any) => m.generation || 1))
-  }
+  if (!statsData.value) return
+  stats.value.familyLines = (statsData.value as any).byFamilyLine?.length || 0
+  stats.value.members = (statsData.value as any).total || 0
+  const gens: number[] = (statsData.value as any).byGeneration?.map((g: any) => g.generation) || []
+  stats.value.generations = gens.length ? Math.max(...gens) : 0
 })
 </script>

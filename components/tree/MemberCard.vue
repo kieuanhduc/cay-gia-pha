@@ -7,7 +7,7 @@
     leave-from-class="translate-x-0"
     leave-to-class="translate-x-full"
   >
-    <div v-if="member" class="fixed right-0 top-0 bottom-0 w-full sm:w-80 bg-white shadow-2xl z-50 overflow-y-auto">
+    <div v-if="props.memberId" class="fixed right-0 top-0 bottom-0 w-full sm:w-80 bg-white shadow-2xl z-50 overflow-y-auto">
       <div class="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <h3 class="font-semibold text-gray-900">Chi tiết thành viên</h3>
         <button @click="$emit('close')" class="p-1 rounded-lg hover:bg-gray-100">

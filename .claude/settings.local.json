@@ -23,7 +23,12 @@
       "Bash(brew list:*)",
       "Bash(npx nuxi dev:*)",
       "Bash(node -e:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(head:*)",
+      "Bash(cat:*)",
+      "Bash(npx tsc:*)",
+      "Bash(python3:*)",
+      "Bash(grep:*)"
     ]
   }
 }

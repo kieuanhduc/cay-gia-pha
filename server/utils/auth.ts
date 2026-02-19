@@ -5,6 +5,7 @@ import type { H3Event } from 'h3'
 interface TokenPayload {
   userId: number
   username: string
+  fullName: string
   role: string
 }
 

@@ -145,7 +145,7 @@ function handleZoomOut() { getTree()?.zoomOut() }
 function handleFit() { getTree()?.fit() }
 
 // Initial fetch (without password)
-const { data: treeData, pending, error } = await useFetch<any>(`/api/share/${token}`)
+const { data: treeData, pending, error } = useLazyFetch<any>(`/api/share/${token}`)
 
 // If data loaded without needing password, use it directly
 if (treeData.value && !treeData.value.requiresPassword) {

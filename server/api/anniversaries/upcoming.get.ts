@@ -74,27 +74,28 @@ export default defineEventHandler(async (event): Promise<AnniversaryItem[]> => {
   const memberIdsFromMembers = new Set<number>()
 
   for (const member of members) {
-    let lunarDay: number
-    let lunarMonth: number
-    let lunarDateStr: string
-
-    if (member.deathAnniversaryLunar) {
-      const parsed = parseLunarDate(member.deathAnniversaryLunar)
-      if (!parsed) continue
-      lunarDay = parsed.day
-      lunarMonth = parsed.month
-      lunarDateStr = member.deathAnniversaryLunar
-    } else if (member.deathDate) {
-      const d = new Date(member.deathDate)
-      const converted = solarToLunar(d.getFullYear(), d.getMonth() + 1, d.getDate())
-      lunarDay = converted.lunarDay
-      lunarMonth = converted.lunarMonth
-      lunarDateStr = `${String(lunarDay).padStart(2, '0')}/${String(lunarMonth).padStart(2, '0')}`
-    } else {
-      continue
-    }
-
     try {
+      let lunarDay: number
+      let lunarMonth: number
+      let lunarDateStr: string
+
+      if (member.deathAnniversaryLunar) {
+        const parsed = parseLunarDate(member.deathAnniversaryLunar)
+        if (!parsed) continue
+        lunarDay = parsed.day
+        lunarMonth = parsed.month
+        lunarDateStr = member.deathAnniversaryLunar
+      } else if (member.deathDate) {
+        const d = new Date(member.deathDate)
+        // solarToLunar can throw for edge-case dates — now safely wrapped
+        const converted = solarToLunar(d.getFullYear(), d.getMonth() + 1, d.getDate())
+        lunarDay = converted.lunarDay
+        lunarMonth = converted.lunarMonth
+        lunarDateStr = `${String(lunarDay).padStart(2, '0')}/${String(lunarMonth).padStart(2, '0')}`
+      } else {
+        continue
+      }
+
       const { solarDateStr, daysUntil } = getNextLunarAnniversary(lunarDay, lunarMonth)
 
       if (daysUntil <= days) {

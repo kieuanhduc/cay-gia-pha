@@ -86,5 +86,5 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 
-const { data: stats, pending } = await useFetch('/api/stats')
+const { data: stats, pending } = useLazyFetch('/api/stats')
 </script>

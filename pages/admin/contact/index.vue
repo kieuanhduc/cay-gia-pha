@@ -138,7 +138,7 @@ const queryParams = computed(() => {
   return p
 })
 
-const { data, pending, refresh } = await useFetch<any>('/api/contact', { query: queryParams })
+const { data, pending, refresh } = useLazyFetch<any>('/api/contact', { query: queryParams })
 const messages = computed(() => data.value?.items || [])
 const total = computed(() => data.value?.total || 0)
 const unreadCount = computed(() => data.value?.unreadCount || 0)

@@ -66,7 +66,7 @@ useHead({ title: 'Sự kiện - Cây Gia Phả' })
 const page = ref(1)
 const limit = 10
 
-const { data, pending } = await useFetch<any>('/api/posts', {
+const { data, pending } = useLazyFetch<any>('/api/posts', {
   query: computed(() => ({ type: 'event', published: 'true', page: page.value, limit })),
 })
 

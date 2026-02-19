@@ -119,7 +119,7 @@ const queryParams = computed(() => {
   return p
 })
 
-const { data, pending, refresh } = await useFetch<any>('/api/posts', { query: queryParams })
+const { data, pending, refresh } = useLazyFetch<any>('/api/posts', { query: queryParams })
 const posts = computed(() => data.value?.items || [])
 const total = computed(() => data.value?.total || 0)
 

@@ -145,25 +145,35 @@ const { canEdit } = useAuth()
 const filters = ref({ familyLineId: '', search: '', generation: '', page: 1 })
 const limit = 50
 
-const { data: familyLinesData } = await useFetch('/api/family-lines')
+const nuxtApp = useNuxtApp()
+const { data: familyLinesData } = useLazyFetch('/api/family-lines', {
+  getCachedData: (key) => nuxtApp.payload.data[key] as any,
+})
 const familyLines = computed(() => familyLinesData.value || [])
 
-const queryParams = computed(() => {
+function buildQuery() {
   const params: any = { page: filters.value.page, limit }
   if (filters.value.familyLineId) params.familyLineId = filters.value.familyLineId
   if (filters.value.search) params.search = filters.value.search
   if (filters.value.generation) params.generation = filters.value.generation
   return params
-})
+}
 
-const { data, pending, refresh } = await useFetch<any>('/api/members', { query: queryParams })
+const { data, pending, refresh } = useLazyAsyncData(
+  'admin-members',
+  () => $fetch<any>('/api/members', { query: buildQuery() }),
+  { watch: false }
+)
 const members = computed(() => data.value?.members || [])
 const total = computed(() => data.value?.total || 0)
 
 let searchTimeout: ReturnType<typeof setTimeout>
 function debouncedSearch() {
   clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => { filters.value.page = 1 }, 300)
+  searchTimeout = setTimeout(() => {
+    filters.value.page = 1
+    refresh()
+  }, 500)
 }
 
 // Bulk delete state
@@ -234,8 +244,9 @@ async function deleteMember() {
   }
 }
 
-// Clear selection when filters change
-watch(() => filters.value.page, () => { selectedIds.value = [] })
-watch(() => filters.value.familyLineId, () => { selectedIds.value = [] })
-watch(() => filters.value.generation, () => { selectedIds.value = [] })
+// Pagination: re-fetch when page changes
+watch(() => filters.value.page, () => { selectedIds.value = []; refresh() })
+// Dropdowns: re-fetch immediately when changed
+watch(() => filters.value.familyLineId, () => { selectedIds.value = []; filters.value.page = 1; nextTick(() => refresh()) })
+watch(() => filters.value.generation, () => { selectedIds.value = []; filters.value.page = 1; nextTick(() => refresh()) })
 </script>

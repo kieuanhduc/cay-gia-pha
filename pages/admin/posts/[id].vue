@@ -29,7 +29,7 @@ const route = useRoute()
 const router = useRouter()
 const id = route.params.id
 
-const { data: post, pending } = await useFetch<any>(`/api/posts/${id}`)
+const { data: post, pending } = useLazyFetch<any>(`/api/posts/${id}`)
 
 function onSave() {
   navigateTo('/admin/posts')

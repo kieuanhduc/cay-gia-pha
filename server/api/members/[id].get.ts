@@ -36,8 +36,8 @@ export default defineEventHandler(async (event) => {
     ...member.spousesAsB.map((s) => ({ ...s.memberA, marriedDate: s.marriedDate })),
   ]
 
+  // fatherOf and motherOf are mutually exclusive sets (same child can't appear in both)
   const children = [...member.fatherOf, ...member.motherOf]
-    .filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i)
 
   return { ...member, spouses, children, spousesAsA: undefined, spousesAsB: undefined, fatherOf: undefined, motherOf: undefined }
 })

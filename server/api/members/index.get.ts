@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const where: any = {}
   if (familyLineId) where.familyLineId = familyLineId
   if (generation) where.generation = generation
-  if (search) where.fullName = { contains: search }
+  if (search) where.fullName = { contains: search, mode: 'insensitive' }
 
   const [members, total] = await Promise.all([
     prisma.member.findMany({

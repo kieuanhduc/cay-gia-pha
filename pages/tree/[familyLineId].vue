@@ -251,7 +251,7 @@ async function handleExportPdf(options: import('~/composables/useTreeExport').Pd
   await exportTreeAsPdf(svgElement, options)
 }
 
-const { data: treeData, pending, refresh: refreshTree } = await useFetch<any>(`/api/family-lines/${route.params.familyLineId}/tree`)
+const { data: treeData, pending, refresh: refreshTree } = useLazyFetch<any>(`/api/family-lines/${route.params.familyLineId}/tree`)
 
 // Share
 const shareDialogData = computed(() => {
@@ -300,17 +300,21 @@ const allMembers = computed(() => {
   return flattenTree(treeData.value.tree)
 })
 
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null
 function onSearch() {
-  selectedSearchIndex.value = 0
-  const q = searchQuery.value.trim().toLowerCase()
-  if (!q) {
-    searchResults.value = []
-    highlightMemberId.value = null
-    return
-  }
-  searchResults.value = allMembers.value.filter((m: any) =>
-    m.fullName.toLowerCase().includes(q)
-  ).slice(0, 10)
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer)
+  searchDebounceTimer = setTimeout(() => {
+    selectedSearchIndex.value = 0
+    const q = searchQuery.value.trim().toLowerCase()
+    if (!q) {
+      searchResults.value = []
+      highlightMemberId.value = null
+      return
+    }
+    searchResults.value = allMembers.value.filter((m: any) =>
+      m.fullName.toLowerCase().includes(q)
+    ).slice(0, 10)
+  }, 200)
 }
 
 function selectSearchResult() {

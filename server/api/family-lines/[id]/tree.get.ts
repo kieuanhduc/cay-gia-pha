@@ -50,10 +50,18 @@ export default defineEventHandler(async (event) => {
     orderBy: [{ generation: 'asc' }, { birthOrder: 'asc' }],
   })
 
+  // Pre-build children map for O(1) lookup instead of O(n) filter per node
+  const childrenMap = new Map<number, typeof members>()
+  for (const m of members) {
+    if (m.fatherId) {
+      if (!childrenMap.has(m.fatherId)) childrenMap.set(m.fatherId, [])
+      childrenMap.get(m.fatherId)!.push(m)
+    }
+  }
+
   // Build tree recursively
   function buildNode(member: typeof members[0]): TreeNode {
-    const children = members
-      .filter((m) => m.fatherId === member.id)
+    const children = (childrenMap.get(member.id) ?? [])
       .sort((a, b) => a.birthOrder - b.birthOrder)
       .map((child) => buildNode(child))
 

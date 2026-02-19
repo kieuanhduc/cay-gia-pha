@@ -415,7 +415,7 @@ export function useTreeExport() {
 
       // 5. Capture
       const dataUrl = await toPng(container, {
-        pixelRatio: 3,
+        pixelRatio: 2,
         backgroundColor: '#FEF9EE',
         width: totalW,
         height: totalH,
