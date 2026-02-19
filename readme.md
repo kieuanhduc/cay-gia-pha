@@ -6,15 +6,20 @@
 
 - **Frontend:** Nuxt 3, Vue 3, Tailwind CSS, D3.js
 - **Backend:** Nitro Server (Nuxt built-in)
-- **Database:** MySQL + Prisma ORM
+- **Database:** PostgreSQL (Supabase) + Prisma ORM
 - **Auth:** JWT (HTTP-only cookie)
 - **Icons:** Phosphor Icons (@nuxt/icon)
+- **Deployment:** Vercel (Free tier)
 
 ## Yêu cầu hệ thống
 
+### Development:
 - **Node.js** >= 18
-- **Docker** & **Docker Compose** (để chạy MySQL)
 - **npm** (đi kèm Node.js)
+
+### Production:
+- **Supabase** account (FREE - https://supabase.com)
+- **Vercel** account (FREE - https://vercel.com)
 
 ## Hướng dẫn cài đặt từng bước
 
@@ -33,62 +38,68 @@ npm install
 
 Lệnh này sẽ tự động chạy `nuxt prepare` và `prisma generate` sau khi cài xong (postinstall).
 
-### Bước 3: Cấu hình environment
+### Bước 3: Setup Database với Supabase (FREE)
 
-Tạo file `.env` từ file mẫu:
-
+#### 3.1. Tạo Supabase Project (2 phút)
 ```bash
-cp .env.example .env
+# 1. Vào https://supabase.com
+# 2. Sign up (FREE, không cần credit card)
+# 3. Create new project:
+#    - Name: cay-gia-pha
+#    - Database password: <tạo-password-mạnh> (LƯU LẠI!)
+#    - Region: Southeast Asia (Singapore)
+# 4. Chờ 2 phút để project khởi tạo
+```
+
+#### 3.2. Lấy connection string
+```bash
+# Trong Supabase Dashboard:
+# Settings > Database > Connection string > URI
+# Copy và thay [YOUR-PASSWORD] bằng password của bạn
+```
+
+#### 3.3. Tạo file .env
+```bash
+# Copy template
+cp env.supabase.template .env
+
+# Edit .env và paste connection string
 ```
 
 Nội dung file `.env`:
 
 ```env
-DATABASE_URL="mysql://giapha:giapha123@localhost:3306/cay_gia_pha"
+DATABASE_URL="postgresql://postgres.[ref]:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres"
 JWT_SECRET="change-this-to-a-strong-secret"
 ```
 
-- `DATABASE_URL`: Connection string MySQL (khớp với docker-compose.yml)
-- `JWT_SECRET`: Khóa bí mật để tạo JWT token, **nên đổi thành chuỗi ngẫu nhiên** khi deploy
+- `DATABASE_URL`: Connection string PostgreSQL từ Supabase
+- `JWT_SECRET`: Khóa bí mật để tạo JWT token (generate: `openssl rand -base64 32`)
 
-### Bước 4: Khởi động MySQL bằng Docker
-
-```bash
-docker compose up -d
-```
-
-MySQL sẽ chạy trên port `3306` với cấu hình:
-- Database: `cay_gia_pha`
-- User: `giapha` / Password: `giapha123`
-- Root password: `root123`
-- Charset: `utf8mb4` (hỗ trợ tiếng Việt đầy đủ)
-
-Đợi khoảng **10-15 giây** cho MySQL khởi động xong. Kiểm tra bằng:
+### Bước 4: Migrate database schema
 
 ```bash
-docker compose logs mysql
-# Tìm dòng "ready for connections" là đã sẵn sàng
+# Push schema lên Supabase
+npx prisma db push
 ```
 
-### Bước 5: Tạo database schema
+Lệnh này sẽ tạo tất cả bảng trong Supabase PostgreSQL theo schema định nghĩa trong `prisma/schema.prisma`.
 
-```bash
-npx prisma migrate dev --name init
-```
-
-Lệnh này sẽ tạo tất cả bảng trong database theo schema định nghĩa trong `prisma/schema.prisma`.
-
-### Bước 6: Tạo dữ liệu mẫu
+### Bước 5: Tạo dữ liệu mẫu
 
 ```bash
 npm run db:seed
 ```
 
-Seed sẽ tạo tài khoản admin mặc định:
-- **Username:** `admin`
-- **Password:** `admin123`
+Seed sẽ tạo:
+- Tài khoản admin: **Username:** `admin`, **Password:** `admin123`
 
-### Bước 7: Chạy ứng dụng
+Tạo sample content (tin tức, sự kiện, giới thiệu):
+```bash
+npm run seed:content
+```
+
+### Bước 6: Chạy ứng dụng
 
 ```bash
 npm run dev
@@ -96,17 +107,34 @@ npm run dev
 
 Ứng dụng sẽ chạy tại: **http://localhost:3000**
 
-### Tóm tắt toàn bộ lệnh
+### ⚡ Quick Start - Dùng script tự động
 
 ```bash
+# Chạy script migration tự động
+./scripts/migrate-to-supabase.sh
+# Nhập connection string từ Supabase
+# Chọn option 2 (seed admin + content)
+# Done!
+```
+
+### Tóm tắt toàn bộ lệnh (Manual)
+
+```bash
+# Clone & install
 git clone <repository-url>
 cd cay-gia-pha
 npm install
-cp .env.example .env
-docker compose up -d
-# Đợi ~15s cho MySQL sẵn sàng
-npx prisma migrate dev --name init
+
+# Setup Supabase (xem bước 3 ở trên)
+cp env.supabase.template .env
+# Edit .env với connection string
+
+# Migrate & seed
+npx prisma db push
 npm run db:seed
+npm run seed:content
+
+# Run
 npm run dev
 ```
 
@@ -188,7 +216,7 @@ npm run dev
 - **Admin:** Xem và quản lý tất cả dòng họ
 - **Editor:** Chỉ xem và chỉnh sửa dòng họ được admin gán
 - **Viewer:** Chỉ xem dòng họ được gán
-- Khách (chưa đăng nhập) bắt buộc đăng nhập
+- Khách (chưa đăng nhập): Xem trang chủ, tin tức, sự kiện. Cần login để xem cây gia phả
 - Gán quyền xem gia phả cho từng tài khoản qua giao diện quản trị
 
 ### Quản lý tài khoản

@@ -1,7 +1,6 @@
-import { join } from 'path'
-import { promises as fs } from 'fs'
 import prisma from '~/server/utils/prisma'
 import { requireRole } from '~/server/utils/auth'
+import { deleteFromSupabase } from '~/server/utils/supabase'
 
 export default defineEventHandler(async (event) => {
   requireRole(event, 'admin', 'editor')
@@ -16,14 +15,15 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Không tìm thấy ảnh' })
   }
 
-  // Delete file from filesystem
-  const filePath = join(process.cwd(), 'public', photo.url)
-  try {
-    await fs.unlink(filePath)
-  } catch {
-    // File may not exist, continue with DB deletion
+  // Delete from Supabase Storage
+  if (photo.url.includes('supabase')) {
+    const path = photo.url.split('/members/')[1]
+    if (path) {
+      await deleteFromSupabase('members', path)
+    }
   }
 
+  // Delete from database
   await prisma.memberPhoto.delete({
     where: { id: photoId },
   })

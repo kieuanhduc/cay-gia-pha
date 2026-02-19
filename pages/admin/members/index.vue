@@ -1,7 +1,17 @@
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Quản lý thành viên</h1>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-bold text-gray-900">Quản lý thành viên</h1>
+        <button
+          v-if="canEdit && selectedIds.length > 0"
+          @click="confirmBulkDelete"
+          class="inline-flex items-center gap-1.5 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+        >
+          <Icon name="ph:trash-bold" />
+          Xóa {{ selectedIds.length }} mục
+        </button>
+      </div>
       <NuxtLink v-if="canEdit" to="/admin/members/create" class="btn-primary inline-flex items-center gap-2">
         <Icon name="ph:user-plus-bold" />
         Thêm thành viên
@@ -40,6 +50,15 @@
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-gray-100">
+            <th v-if="canEdit" class="py-3 px-2 w-10">
+              <input
+                type="checkbox"
+                :checked="isAllSelected"
+                @change="toggleSelectAll"
+                class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+                title="Chọn tất cả"
+              />
+            </th>
             <th class="text-left py-3 px-2 font-medium text-gray-500">Họ tên</th>
             <th class="text-left py-3 px-2 font-medium text-gray-500 hidden sm:table-cell">Giới tính</th>
             <th class="text-left py-3 px-2 font-medium text-gray-500 hidden sm:table-cell">Đời</th>
@@ -49,7 +68,15 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="m in members" :key="m.id" class="border-b border-gray-50 hover:bg-gray-50">
+          <tr v-for="m in members" :key="m.id" class="border-b border-gray-50 hover:bg-gray-50" :class="selectedIds.includes(m.id) ? 'bg-primary-50' : ''">
+            <td v-if="canEdit" class="py-3 px-2">
+              <input
+                type="checkbox"
+                :checked="selectedIds.includes(m.id)"
+                @change="toggleSelect(m.id)"
+                class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+              />
+            </td>
             <td class="py-3 px-2">
               <div class="flex items-center gap-2">
                 <img
@@ -100,6 +127,12 @@
       :message="`Xóa thành viên '${deletingItem?.fullName}'?`"
       @confirm="deleteMember"
     />
+    
+    <ConfirmDialog
+      v-model="showBulkDeleteConfirm"
+      :message="`Xóa ${selectedIds.length} thành viên đã chọn?`"
+      @confirm="bulkDelete"
+    />
   </div>
 </template>
 
@@ -133,6 +166,54 @@ function debouncedSearch() {
   searchTimeout = setTimeout(() => { filters.value.page = 1 }, 300)
 }
 
+// Bulk delete state
+const selectedIds = ref<number[]>([])
+const showBulkDeleteConfirm = ref(false)
+
+const isAllSelected = computed(() => 
+  members.value.length > 0 && selectedIds.value.length === members.value.length
+)
+
+function toggleSelectAll() {
+  if (isAllSelected.value) {
+    selectedIds.value = []
+  } else {
+    selectedIds.value = members.value.map((m: any) => m.id)
+  }
+}
+
+function toggleSelect(id: number) {
+  const index = selectedIds.value.indexOf(id)
+  if (index > -1) {
+    selectedIds.value.splice(index, 1)
+  } else {
+    selectedIds.value.push(id)
+  }
+}
+
+function confirmBulkDelete() {
+  if (selectedIds.value.length === 0) return
+  showBulkDeleteConfirm.value = true
+}
+
+async function bulkDelete() {
+  if (selectedIds.value.length === 0) return
+  
+  try {
+    // Xóa tuần tự từng member
+    for (const id of selectedIds.value) {
+      await $fetch(`/api/members/${id}`, { method: 'DELETE' })
+    }
+    
+    showBulkDeleteConfirm.value = false
+    selectedIds.value = []
+    await refresh()
+  } catch (e: any) {
+    alert(e.data?.message || 'Xóa thất bại')
+  }
+}
+
+// Single delete
 const showDeleteConfirm = ref(false)
 const deletingItem = ref<any>(null)
 
@@ -152,4 +233,9 @@ async function deleteMember() {
     alert(e.data?.message || 'Xóa thất bại')
   }
 }
+
+// Clear selection when filters change
+watch(() => filters.value.page, () => { selectedIds.value = [] })
+watch(() => filters.value.familyLineId, () => { selectedIds.value = [] })
+watch(() => filters.value.generation, () => { selectedIds.value = [] })
 </script>

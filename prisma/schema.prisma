@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -205,7 +205,7 @@ model Post {
   title       String    @db.VarChar(300)
   slug        String    @unique @db.VarChar(300)
   excerpt     String?   @db.Text
-  content     String    @db.LongText
+  content     String    @db.Text
   coverImage  String?   @db.VarChar(500)
   published   Boolean   @default(false)
   eventDate   DateTime? @db.Date
@@ -235,7 +235,7 @@ model ContactMessage {
 
 model SiteContent {
   key       String   @id @db.VarChar(50)
-  content   String   @db.LongText
+  content   String   @db.Text
   updatedAt DateTime @updatedAt
 
   @@map("site_contents")

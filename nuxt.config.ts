@@ -9,6 +9,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     jwtSecret: process.env.JWT_SECRET || 'gia-pha-secret-key-change-me',
+    databaseUrl: process.env.DATABASE_URL || '',
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY || '',
     smtpHost: process.env.SMTP_HOST || '',
     smtpPort: process.env.SMTP_PORT || '587',
     smtpUser: process.env.SMTP_USER || '',

@@ -2,7 +2,8 @@ import prisma from '~/server/utils/prisma'
 import { requireRole } from '~/server/utils/auth'
 import formidable from 'formidable'
 import { promises as fs } from 'fs'
-import { join, extname } from 'path'
+import { extname } from 'path'
+import { uploadToSupabase, deleteFromSupabase } from '~/server/utils/supabase'
 
 export default defineEventHandler(async (event) => {
   requireRole(event, 'admin', 'editor')
@@ -11,13 +12,9 @@ export default defineEventHandler(async (event) => {
   const existing = await prisma.post.findUnique({ where: { id } })
   if (!existing) throw createError({ statusCode: 404, message: 'Không tìm thấy bài viết' })
 
-  const uploadDir = join(process.cwd(), 'public', 'uploads', 'covers')
-  await fs.mkdir(uploadDir, { recursive: true })
-
+  // Parse form
   const form = formidable({
-    uploadDir,
-    keepExtensions: true,
-    maxFileSize: 5 * 1024 * 1024,
+    maxFileSize: 5 * 1024 * 1024, // 5MB
     filter: ({ mimetype }) => !!mimetype?.startsWith('image/'),
   })
 
@@ -26,18 +23,33 @@ export default defineEventHandler(async (event) => {
 
   if (!file) throw createError({ statusCode: 400, message: 'Vui lòng chọn ảnh' })
 
+  // Read file buffer
+  const fileBuffer = await fs.readFile(file.filepath)
+  
+  // Generate filename
   const ext = extname(file.originalFilename || '.jpg')
-  const filename = `cover-${id}-${Date.now()}${ext}`
-  const finalPath = join(uploadDir, filename)
-  await fs.rename(file.filepath, finalPath)
+  const filename = `covers/post-${id}-${Date.now()}${ext}`
 
-  // Xoá ảnh cũ nếu có
-  if (existing.coverImage) {
-    const oldPath = join(process.cwd(), 'public', existing.coverImage)
-    await fs.unlink(oldPath).catch(() => {})
+  // Upload to Supabase
+  const coverImage = await uploadToSupabase(
+    'members',
+    filename,
+    fileBuffer,
+    file.mimetype || 'image/jpeg'
+  )
+
+  // Delete old cover from Supabase if exists
+  if (existing.coverImage && existing.coverImage.includes('supabase')) {
+    const oldPath = existing.coverImage.split('/members/')[1]
+    if (oldPath) {
+      await deleteFromSupabase('members', oldPath)
+    }
   }
 
-  const coverImage = `/uploads/covers/${filename}`
+  // Clean up temp file
+  await fs.unlink(file.filepath).catch(() => {})
+
+  // Update database
   await prisma.post.update({ where: { id }, data: { coverImage } })
 
   return { coverImage }
