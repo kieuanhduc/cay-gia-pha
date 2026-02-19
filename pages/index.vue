@@ -398,7 +398,7 @@ const features = [
     iconColor: 'text-rose-600',
   },
   {
-    icon: 'ph:candle-bold',
+    icon: 'ph:candle',
     title: 'Ngày giỗ âm lịch',
     desc: 'Ghi nhận và nhắc nhở ngày giỗ theo âm lịch, không bỏ sót ngày quan trọng',
     bgColor: 'bg-orange-100',

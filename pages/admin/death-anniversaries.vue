@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1 class="text-2xl font-bold text-gray-900 mb-6">
-      <Icon name="ph:candle-bold" class="text-primary-600 mr-2" />
+      <Icon name="ph:candle" class="text-primary-600 mr-2" />
       Ngày giỗ
     </h1>
 
