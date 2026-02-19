@@ -92,7 +92,7 @@ npm run db:seed
 ```
 
 Seed sẽ tạo:
-- Tài khoản admin: **Username:** `admin`, **Password:** `admin123`
+- Tài khoản admin: **Username:** `admin`, **Password:** `Kieuanhduc2722000@`
 
 Tạo sample content (tin tức, sự kiện, giới thiệu):
 ```bash

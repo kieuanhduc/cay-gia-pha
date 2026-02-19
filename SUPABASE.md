@@ -136,7 +136,7 @@ npm run seed:content
 npm run dev
 
 # Test:
-# ✅ Login với admin/admin123
+# ✅ Login với admin/Kieuanhduc2722000@
 # ✅ Tạo dòng họ
 # ✅ Thêm thành viên
 # ✅ Upload ảnh

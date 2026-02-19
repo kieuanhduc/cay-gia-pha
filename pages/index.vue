@@ -146,7 +146,7 @@
           </p>
 
           <div class="flex items-center justify-between mt-5 pt-4 border-t border-gray-50">
-            <span class="text-sm font-medium text-gray-400">
+            <span class="text-sm font-medium text-gray-500">
               <Icon name="ph:users-bold" class="mr-1" />{{ fl.memberCount }} thành viên
             </span>
             <span class="text-sm font-medium text-primary-600 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-8px] group-hover:translate-x-0 flex items-center gap-1">

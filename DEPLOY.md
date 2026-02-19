@@ -109,7 +109,7 @@ Wait 2-3 minutes...
 
 ### Security
 - [ ] Đăng nhập vào production site
-- [ ] Đổi password admin (từ `admin123` sang password mạnh)
+- [ ] Đổi password admin (từ `Kieuanhduc2722000@` sang password mạnh)
 - [ ] Xóa hoặc disable user test
 - [ ] Enable 2FA cho Supabase account
 - [ ] Enable 2FA cho Vercel account

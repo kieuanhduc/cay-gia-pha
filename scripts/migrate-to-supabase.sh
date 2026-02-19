@@ -146,7 +146,7 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 echo ""
 echo "📋 Default admin credentials:"
 echo "   Username: admin"
-echo "   Password: admin123"
+echo "   Password: Kieuanhduc2722000@"
 echo ""
 echo -e "${RED}🔐 QUAN TRỌNG: Đổi mật khẩu admin sau khi login!${NC}"
 echo ""

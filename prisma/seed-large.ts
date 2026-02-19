@@ -36,7 +36,7 @@ async function main() {
   await prisma.familyLine.deleteMany()
 
   // Ensure admin
-  const hashedPassword = await bcrypt.hash('admin123', 10)
+  const hashedPassword = await bcrypt.hash('Kieuanhduc2722000@', 10)
   await prisma.user.upsert({
     where: { username: 'admin' },
     update: {},

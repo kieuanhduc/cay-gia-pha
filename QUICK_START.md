@@ -57,7 +57,7 @@ Xem chi tiết trong: **[SUPABASE.md](SUPABASE.md)**
 
 ```
 Username: admin
-Password: admin123
+Password: Kieuanhduc2722000@
 ```
 
 ⚠️ **QUAN TRỌNG**: Đổi password sau khi deploy!

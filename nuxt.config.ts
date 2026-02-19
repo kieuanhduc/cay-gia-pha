@@ -1,7 +1,10 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss', '@nuxt/icon', 'nuxt-auth-utils'],
-  css: ['~/assets/css/main.css'],
+  css: [],
+  tailwindcss: {
+    cssPath: '~/assets/css/main.css',
+  },
 
   components: [
     { path: '~/components', pathPrefix: false },
@@ -23,6 +26,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: { lang: 'vi' },
       title: 'Cây Gia Phả',
       meta: [
         { charset: 'utf-8' },
@@ -32,7 +36,17 @@ export default defineNuxtConfig({
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap' },
+        {
+          rel: 'preload',
+          as: 'style',
+          href: 'https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,600;0,700&display=swap',
+          onload: "this.onload=null;this.rel='stylesheet'",
+        },
+      ],
+      noscript: [
+        {
+          innerHTML: '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,600;0,700&display=swap">',
+        },
       ],
     },
   },
@@ -48,7 +62,8 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    compressPublicAssets: true,
+    compressPublicAssets: { brotli: true, gzip: true },
+    minify: true,
   },
 
   compatibilityDate: '2025-01-01',

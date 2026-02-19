@@ -129,7 +129,7 @@ npm run dev
 ### Test Avatar Upload
 ```bash
 1. npm run dev
-2. Login: admin / admin123
+2. Login: admin / Kieuanhduc2722000@
 3. Vào Admin > Thành viên
 4. Click vào một thành viên
 5. Upload ảnh đại diện

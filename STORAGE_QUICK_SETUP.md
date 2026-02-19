@@ -55,7 +55,7 @@ npm run dev
 ## ✅ Test Upload
 
 ```
-1. Login: admin / admin123
+1. Login: admin / Kieuanhduc2722000@
 2. Admin > Thành viên > Click member
 3. Upload avatar
 4. ✔️ Ảnh sẽ upload lên Supabase!
