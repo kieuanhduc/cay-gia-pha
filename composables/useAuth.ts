@@ -31,9 +31,10 @@ export const useAuth = () => {
   }
 
   async function fetchUser() {
-    // On client-side: skip if already initialized (state hydrated from SSR)
-    // This prevents a /api/auth/me call on every client-side navigation
-    if (import.meta.client && authInitialized.value) return
+    // On client-side: skip only if user is already loaded.
+    // Do NOT skip when user is null — it could mean we just returned from
+    // Google OAuth (cookie set but Vue state not yet updated).
+    if (import.meta.client && user.value) return
 
     try {
       if (import.meta.server) {
