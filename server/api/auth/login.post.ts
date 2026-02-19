@@ -22,10 +22,13 @@ export default defineEventHandler(async (event) => {
     role: user.role,
   })
 
+  // Set cookie with production-ready settings
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
+  
   setCookie(event, 'auth_token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'strict' : 'lax',
     maxAge: 60 * 60 * 24, // 24 hours
     path: '/',
   })
