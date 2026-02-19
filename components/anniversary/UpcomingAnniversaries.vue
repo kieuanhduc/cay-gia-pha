@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-        <Icon name="ph:candle" class="text-primary-600" />
+        <Icon name="ph:flower" class="text-primary-600" />
         Ngày giỗ sắp tới
       </h2>
       <span
@@ -24,7 +24,7 @@
       v-else-if="!anniversaries.length"
       class="text-center py-8 text-gray-400 text-sm"
     >
-      <Icon name="ph:candle" class="text-3xl mb-2 block mx-auto opacity-40" />
+      <Icon name="ph:flower" class="text-3xl mb-2 block mx-auto opacity-40" />
       Không có ngày giỗ trong 60 ngày tới
     </div>
 
@@ -41,7 +41,7 @@
             class="w-9 h-9 rounded-full flex items-center justify-center"
             :class="urgencyBg(item.daysUntil)"
           >
-            <Icon name="ph:candle" class="text-sm" :class="urgencyIcon(item.daysUntil)" />
+            <Icon name="ph:flower" class="text-sm" :class="urgencyIcon(item.daysUntil)" />
           </div>
         </div>
 

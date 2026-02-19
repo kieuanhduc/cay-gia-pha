@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1 class="text-2xl font-bold text-gray-900 mb-6">
-      <Icon name="ph:candle" class="text-primary-600 mr-2" />
+      <Icon name="ph:flower" class="text-primary-600 mr-2" />
       Ngày giỗ
     </h1>
 
@@ -34,7 +34,7 @@
 
     <!-- Empty state -->
     <div v-else-if="!items.length" class="card text-center py-12">
-      <Icon name="ph:candle" class="text-gray-300 text-5xl mb-3" />
+      <Icon name="ph:flower" class="text-gray-300 text-5xl mb-3" />
       <p class="text-gray-500">Chưa có ngày giỗ nào được ghi nhận</p>
       <button v-if="canEdit" @click="openAddModal" class="btn-primary mt-4">
         <Icon name="ph:plus-bold" class="mr-1" />

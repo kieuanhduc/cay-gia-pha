@@ -78,7 +78,7 @@ const allMenuItems = [
   { path: '/admin/members', icon: 'ph:user-bold', label: 'Thành viên' },
   { path: '/admin/search', icon: 'ph:magnifying-glass-bold', label: 'Tìm kiếm' },
   { path: '/admin/statistics', icon: 'ph:chart-bar-bold', label: 'Thống kê' },
-  { path: '/admin/death-anniversaries', icon: 'ph:candle', label: 'Ngày giỗ' },
+  { path: '/admin/death-anniversaries', icon: 'ph:flower', label: 'Ngày giỗ' },
   { path: '/admin/posts', icon: 'ph:newspaper-bold', label: 'Tin tức & Sự kiện' },
   { path: '/admin/contact', icon: 'ph:envelope-bold', label: 'Tin nhắn liên hệ' },
   { path: '/admin/about', icon: 'ph:info-bold', label: 'Giới thiệu & Liên hệ' },

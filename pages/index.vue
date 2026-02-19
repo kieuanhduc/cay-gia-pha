@@ -162,18 +162,18 @@
 
 
     <!-- Latest News -->
-    <section v-if="latestNews.length" class="py-16 bg-white">
+    <section class="py-16 bg-white">
       <div class="max-w-6xl mx-auto px-4">
         <div class="flex items-center justify-between mb-8">
           <div>
             <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Tin tức mới nhất</h2>
             <p class="text-gray-500 mt-1">Cập nhật tin tức về dòng họ</p>
           </div>
-          <NuxtLink to="/news" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors">
+          <NuxtLink v-if="latestNews.length" to="/news" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors">
             Xem tất cả <Icon name="ph:arrow-right" />
           </NuxtLink>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-if="latestNews.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <NuxtLink
             v-for="post in latestNews"
             :key="post.id"
@@ -219,11 +219,11 @@
             <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Sự kiện sắp diễn ra</h2>
             <p class="text-gray-500 mt-1">Các hoạt động và sự kiện của dòng họ</p>
           </div>
-          <NuxtLink to="/events" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors">
+          <NuxtLink v-if="upcomingEvents.length" to="/events" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors">
             Xem tất cả <Icon name="ph:arrow-right" />
           </NuxtLink>
         </div>
-        <div class="space-y-4">
+        <div v-if="upcomingEvents.length" class="space-y-4">
           <NuxtLink
             v-for="post in upcomingEvents"
             :key="post.id"
@@ -325,13 +325,16 @@ const { data: familyLines, pending } = isLoggedIn.value
   ? await useFetch<any[]>('/api/family-lines')
   : { data: ref([]), pending: ref(false) }
 
-const { data: newsData } = await useFetch<any>('/api/posts', {
+// Lazy load để không block SSR
+const { data: newsData } = await useLazyFetch<any>('/api/posts', {
   query: { type: 'news', published: 'true', limit: 3 },
+  server: false, // Client-side only
 })
 const latestNews = computed(() => newsData.value?.items || [])
 
-const { data: eventsData } = await useFetch<any>('/api/posts', {
+const { data: eventsData } = await useLazyFetch<any>('/api/posts', {
   query: { type: 'event', published: 'true', limit: 3 },
+  server: false, // Client-side only
 })
 const upcomingEvents = computed(() => eventsData.value?.items || [])
 
@@ -398,7 +401,7 @@ const features = [
     iconColor: 'text-rose-600',
   },
   {
-    icon: 'ph:candle',
+    icon: 'ph:flower',
     title: 'Ngày giỗ âm lịch',
     desc: 'Ghi nhận và nhắc nhở ngày giỗ theo âm lịch, không bỏ sót ngày quan trọng',
     bgColor: 'bg-orange-100',
