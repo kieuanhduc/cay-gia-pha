@@ -14,6 +14,11 @@ export interface CalendarAnniversaryItem {
   source: 'member' | 'anniversary'
 }
 
+export interface CalendarResponse {
+  items: CalendarAnniversaryItem[]
+  lunarGrid: Record<number, string>
+}
+
 function parseLunarDate(lunarStr: string): { day: number; month: number } | null {
   const match = lunarStr.match(/^(\d{1,2})\/(\d{1,2})$/)
   if (!match) return null
@@ -49,7 +54,7 @@ function findSolarDayInMonth(
   return null
 }
 
-export default defineEventHandler(async (event): Promise<CalendarAnniversaryItem[]> => {
+export default defineEventHandler(async (event): Promise<CalendarResponse> => {
   requireAuth(event)
 
   const query = getQuery(event)
@@ -185,5 +190,13 @@ export default defineEventHandler(async (event): Promise<CalendarAnniversaryItem
 
   results.sort((a, b) => a.solarDay - b.solarDay || a.fullName.localeCompare(b.fullName))
 
-  return results
+  // Build lunar grid: map each solar day → lunar date string
+  const totalDays = new Date(targetYear, targetMonth, 0).getDate()
+  const lunarGrid: Record<number, string> = {}
+  for (let d = 1; d <= totalDays; d++) {
+    const lunar = solarToLunar(targetYear, targetMonth, d)
+    lunarGrid[d] = `${lunar.lunarDay}${lunar.lunarDay === 1 ? `/T${lunar.lunarMonth}` : ''}`
+  }
+
+  return { items: results, lunarGrid }
 })

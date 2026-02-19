@@ -96,14 +96,22 @@
             }"
             @click="selectDay(day)"
           >
-            <!-- Day number -->
-            <div
-              class="text-xs font-semibold mb-1 w-6 h-6 flex items-center justify-center rounded-full"
-              :class="isToday(day)
-                ? 'bg-primary-600 text-white'
-                : isSunday(day) ? 'text-red-500' : 'text-gray-700'"
-            >
-              {{ day }}
+            <!-- Day number + lunar date -->
+            <div class="flex items-start justify-between mb-1">
+              <div
+                class="text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full shrink-0"
+                :class="isToday(day)
+                  ? 'bg-primary-600 text-white'
+                  : isSunday(day) ? 'text-red-500' : 'text-gray-700'"
+              >
+                {{ day }}
+              </div>
+              <div
+                class="text-[10px] leading-tight text-right"
+                :class="lunarGrid[day]?.includes('/') ? 'text-amber-600 font-semibold' : 'text-gray-400'"
+              >
+                {{ lunarGrid[day] }}
+              </div>
             </div>
 
             <!-- Anniversary badges -->
@@ -211,6 +219,7 @@ const currentMonth = ref(now.getMonth() + 1)
 const filterFamilyLine = ref('')
 const loading = ref(false)
 const items = ref<CalendarItem[]>([])
+const lunarGrid = ref<Record<number, string>>({})
 const selectedDay = ref<number | null>(null)
 
 async function loadData() {
@@ -219,9 +228,12 @@ async function loadData() {
   try {
     const params: any = { year: currentYear.value, month: currentMonth.value }
     if (filterFamilyLine.value) params.familyLineId = filterFamilyLine.value
-    items.value = await $fetch<CalendarItem[]>('/api/anniversaries/calendar', { params })
+    const res = await $fetch<{ items: CalendarItem[], lunarGrid: Record<number, string> }>('/api/anniversaries/calendar', { params })
+    items.value = res.items
+    lunarGrid.value = res.lunarGrid
   } catch {
     items.value = []
+    lunarGrid.value = {}
   } finally {
     loading.value = false
   }
