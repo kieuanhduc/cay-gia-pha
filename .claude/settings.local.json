@@ -36,7 +36,9 @@
       "Bash(npx prisma migrate resolve:*)",
       "Bash(npm run db:seed:*)",
       "Bash(npm run seed:content:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(tree:*)",
+      "Bash(npm uninstall:*)"
     ]
   }
 }

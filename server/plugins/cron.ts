@@ -202,6 +202,12 @@ async function checkAndNotify() {
 }
 
 export default defineNitroPlugin((nitroApp) => {
+  const isEnabled = process.env.CRON_ANNIVERSARY_ENABLED !== 'false'
+  if (!isEnabled) {
+    console.log('[Cron] Tính năng kiểm tra ngày giỗ đã bị tắt (CRON_ANNIVERSARY_ENABLED=false)')
+    return
+  }
+
   // Run check daily at 8:00 AM Vietnam time (1:00 AM UTC)
   const INTERVAL_MS = 24 * 60 * 60 * 1000 // 24 hours
 

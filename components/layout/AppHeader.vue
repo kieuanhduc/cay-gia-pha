@@ -36,7 +36,7 @@
             Đăng xuất
           </button>
         </div>
-        
+
         <!-- Not logged in -->
         <NuxtLink
           v-else

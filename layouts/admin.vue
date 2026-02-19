@@ -74,11 +74,12 @@ const sidebarOpen = ref(false)
 
 const allMenuItems = [
   { path: '/admin', icon: 'ph:house-bold', label: 'Tổng quan' },
+  { path: '/admin/calendar', icon: 'ph:calendar-bold', label: 'Lịch ngày giỗ' },
+  { path: '/admin/death-anniversaries', icon: 'ph:flower', label: 'Ngày giỗ' },
   { path: '/admin/family-lines', icon: 'ph:users-three-bold', label: 'Dòng họ' },
   { path: '/admin/members', icon: 'ph:user-bold', label: 'Thành viên' },
   { path: '/admin/search', icon: 'ph:magnifying-glass-bold', label: 'Tìm kiếm' },
   { path: '/admin/statistics', icon: 'ph:chart-bar-bold', label: 'Thống kê' },
-  { path: '/admin/death-anniversaries', icon: 'ph:flower', label: 'Ngày giỗ' },
   { path: '/admin/posts', icon: 'ph:newspaper-bold', label: 'Tin tức & Sự kiện' },
   { path: '/admin/contact', icon: 'ph:envelope-bold', label: 'Tin nhắn liên hệ' },
   { path: '/admin/about', icon: 'ph:info-bold', label: 'Giới thiệu & Liên hệ' },
