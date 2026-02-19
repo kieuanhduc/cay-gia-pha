@@ -1,5 +1,5 @@
 import prisma from '~/server/utils/prisma'
-import { requireRole, hashPassword } from '~/server/utils/auth'
+import { requireRole, hashPwd } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   requireRole(event, 'admin')
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (body.password?.trim()) {
-    data.password = await hashPassword(body.password)
+    data.password = await hashPwd(body.password)
   }
 
   if (body.email !== undefined) {

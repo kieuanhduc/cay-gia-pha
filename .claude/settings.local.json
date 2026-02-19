@@ -28,7 +28,12 @@
       "Bash(cat:*)",
       "Bash(npx tsc:*)",
       "Bash(python3:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:supabase.com)",
+      "WebFetch(domain:news.ycombinator.com)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx prisma migrate resolve:*)"
     ]
   }
 }

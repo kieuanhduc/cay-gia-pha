@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import prisma from '~/server/utils/prisma'
-import { requireRole, hashPassword } from '~/server/utils/auth'
+import { requireRole, hashPwd } from '~/server/utils/auth'
 import { logActivity } from '~/server/utils/activityLog'
 
 export default defineEventHandler(async (event) => {
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   if (body.isPublic) {
     // Enable sharing
     const shareToken = crypto.randomBytes(32).toString('hex')
-    const sharePassword = body.password ? await hashPassword(body.password) : null
+    const sharePassword = body.password ? await hashPwd(body.password) : null
 
     const updated = await prisma.familyLine.update({
       where: { id: familyLineId },

@@ -9,11 +9,11 @@ interface TokenPayload {
   role: string
 }
 
-export function hashPassword(plain: string): Promise<string> {
+export function hashPwd(plain: string): Promise<string> {
   return bcrypt.hash(plain, 10)
 }
 
-export function verifyPassword(plain: string, hashed: string): Promise<boolean> {
+export function verifyPwd(plain: string, hashed: string): Promise<boolean> {
   return bcrypt.compare(plain, hashed)
 }
 

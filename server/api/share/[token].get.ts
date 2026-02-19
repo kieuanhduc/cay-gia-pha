@@ -1,5 +1,5 @@
 import prisma from '~/server/utils/prisma'
-import { verifyPassword } from '~/server/utils/auth'
+import { verifyPwd } from '~/server/utils/auth'
 
 interface TreeNode {
   id: number
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    const isValid = await verifyPassword(password, familyLine.sharePassword)
+    const isValid = await verifyPwd(password, familyLine.sharePassword)
     if (!isValid) {
       throw createError({ statusCode: 403, message: 'Mật khẩu không đúng' })
     }

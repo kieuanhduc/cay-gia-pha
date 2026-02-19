@@ -90,7 +90,7 @@
         </p>
         <NuxtLink
           to="/login"
-          class="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+          class="inline-flex items-center gap-2 bg-primary-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
         >
           <Icon name="ph:sign-in-bold" />
           Đăng nhập
@@ -162,14 +162,14 @@
 
 
     <!-- Latest News -->
-    <section class="py-16 bg-white">
+    <section v-if="latestNews.length" class="py-16 bg-white">
       <div class="max-w-6xl mx-auto px-4">
         <div class="flex items-center justify-between mb-8">
           <div>
             <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Tin tức mới nhất</h2>
             <p class="text-gray-500 mt-1">Cập nhật tin tức về dòng họ</p>
           </div>
-          <NuxtLink v-if="latestNews.length" to="/news" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors">
+          <NuxtLink v-if="latestNews.length" to="/news" class="text-sm text-primary-700 hover:text-primary-800 font-medium flex items-center gap-1 transition-colors">
             Xem tất cả <Icon name="ph:arrow-right" />
           </NuxtLink>
         </div>
@@ -195,7 +195,7 @@
               </div>
             </div>
             <div class="p-5">
-              <p class="text-xs text-gray-400 mb-2 flex items-center gap-1">
+              <p class="text-xs text-gray-500 mb-2 flex items-center gap-1">
                 <Icon name="ph:clock" class="text-[10px]" />
                 {{ formatDate(post.createdAt) }}
               </p>
@@ -219,7 +219,7 @@
             <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Sự kiện sắp diễn ra</h2>
             <p class="text-gray-500 mt-1">Các hoạt động và sự kiện của dòng họ</p>
           </div>
-          <NuxtLink v-if="upcomingEvents.length" to="/events" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors">
+          <NuxtLink v-if="upcomingEvents.length" to="/events" class="text-sm text-primary-700 hover:text-primary-800 font-medium flex items-center gap-1 transition-colors">
             Xem tất cả <Icon name="ph:arrow-right" />
           </NuxtLink>
         </div>

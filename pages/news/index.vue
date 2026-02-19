@@ -30,7 +30,7 @@
             </div>
           </div>
           <div class="p-4">
-            <p class="text-xs text-gray-400 mb-1">{{ formatDate(post.createdAt) }}</p>
+            <p class="text-xs text-gray-500 mb-1">{{ formatDate(post.createdAt) }}</p>
             <h2 class="font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors">{{ post.title }}</h2>
             <p v-if="post.excerpt" class="text-sm text-gray-500 mt-2 line-clamp-2">{{ post.excerpt }}</p>
           </div>

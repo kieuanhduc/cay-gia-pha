@@ -125,12 +125,14 @@
     <ConfirmDialog
       v-model="showDeleteConfirm"
       :message="`Xóa thành viên '${deletingItem?.fullName}'?`"
+      :loading="deleting"
       @confirm="deleteMember"
     />
-    
+
     <ConfirmDialog
       v-model="showBulkDeleteConfirm"
       :message="`Xóa ${selectedIds.length} thành viên đã chọn?`"
+      :loading="bulkDeleting"
       @confirm="bulkDelete"
     />
   </div>
@@ -206,26 +208,29 @@ function confirmBulkDelete() {
   showBulkDeleteConfirm.value = true
 }
 
+const bulkDeleting = ref(false)
+
 async function bulkDelete() {
   if (selectedIds.value.length === 0) return
-  
+  bulkDeleting.value = true
   try {
-    // Xóa tuần tự từng member
     for (const id of selectedIds.value) {
       await $fetch(`/api/members/${id}`, { method: 'DELETE' })
     }
-    
     showBulkDeleteConfirm.value = false
     selectedIds.value = []
     await refresh()
   } catch (e: any) {
     alert(e.data?.message || 'Xóa thất bại')
+  } finally {
+    bulkDeleting.value = false
   }
 }
 
 // Single delete
 const showDeleteConfirm = ref(false)
 const deletingItem = ref<any>(null)
+const deleting = ref(false)
 
 function confirmDelete(m: any) {
   deletingItem.value = m
@@ -234,6 +239,7 @@ function confirmDelete(m: any) {
 
 async function deleteMember() {
   if (!deletingItem.value) return
+  deleting.value = true
   try {
     await $fetch(`/api/members/${deletingItem.value.id}`, { method: 'DELETE' })
     showDeleteConfirm.value = false
@@ -241,6 +247,8 @@ async function deleteMember() {
     await refresh()
   } catch (e: any) {
     alert(e.data?.message || 'Xóa thất bại')
+  } finally {
+    deleting.value = false
   }
 }
 

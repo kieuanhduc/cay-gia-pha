@@ -1,5 +1,5 @@
 import prisma from '~/server/utils/prisma'
-import { verifyPassword, signToken } from '~/server/utils/auth'
+import { verifyPwd, signToken } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     where: { username: body.username },
   })
 
-  if (!user || !(await verifyPassword(body.password, user.password))) {
+  if (!user || !user.password || !(await verifyPwd(body.password, user.password))) {
     throw createError({ statusCode: 401, message: 'Tên đăng nhập hoặc mật khẩu không đúng' })
   }
 

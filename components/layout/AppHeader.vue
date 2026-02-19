@@ -41,7 +41,7 @@
         <NuxtLink
           v-else
           to="/login"
-          class="hidden md:inline-flex items-center gap-1.5 text-sm bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 font-medium transition-colors"
+          class="hidden md:inline-flex items-center gap-1.5 text-sm bg-primary-700 text-white px-4 py-2 rounded-lg hover:bg-primary-800 font-medium transition-colors"
         >
           <Icon name="ph:sign-in-bold" />
           Đăng nhập
@@ -50,6 +50,8 @@
         <!-- Mobile hamburger -->
         <button
           class="md:hidden p-1.5 rounded-lg hover:bg-gray-100 text-gray-600"
+          :aria-label="menuOpen ? 'Đóng menu' : 'Mở menu'"
+          :aria-expanded="menuOpen"
           @click="menuOpen = !menuOpen"
         >
           <Icon :name="menuOpen ? 'ph:x-bold' : 'ph:list-bold'" class="text-xl" />

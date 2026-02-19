@@ -8,11 +8,12 @@
       <p class="text-gray-500 text-sm">{{ message }}</p>
     </div>
     <div class="flex gap-3 mt-6">
-      <button class="btn-secondary flex-1" @click="$emit('update:modelValue', false)">
+      <button class="btn-secondary flex-1" :disabled="loading" @click="$emit('update:modelValue', false)">
         Hủy
       </button>
-      <button class="btn-danger flex-1" @click="$emit('confirm')">
-        {{ confirmText }}
+      <button class="btn-danger flex-1 inline-flex items-center justify-center gap-2" :disabled="loading" @click="$emit('confirm')">
+        <Icon v-if="loading" name="ph:spinner-bold" class="animate-spin" />
+        {{ loading ? 'Đang xóa...' : confirmText }}
       </button>
     </div>
   </BaseModal>
@@ -24,10 +25,12 @@ withDefaults(defineProps<{
   title?: string
   message?: string
   confirmText?: string
+  loading?: boolean
 }>(), {
   title: 'Xác nhận xóa',
   message: 'Bạn có chắc chắn muốn xóa? Hành động này không thể hoàn tác.',
   confirmText: 'Xóa',
+  loading: false,
 })
 
 defineEmits<{
