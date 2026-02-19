@@ -35,7 +35,7 @@
         <!-- Birth Date -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
-          <input v-model="form.birthDate" type="date" class="input-field" />
+          <DatePicker v-model="form.birthDate" placeholder="Chọn ngày sinh" />
         </div>
 
         <!-- Is Alive -->
@@ -56,14 +56,24 @@
         <!-- Death Date -->
         <div v-if="!form.isAlive">
           <label class="block text-sm font-medium text-gray-700 mb-1">Ngày mất</label>
-          <input v-model="form.deathDate" type="date" class="input-field" />
+          <DatePicker v-model="form.deathDate" placeholder="Chọn ngày mất" />
         </div>
 
         <!-- Death Anniversary Lunar -->
         <div v-if="!form.isAlive">
           <label class="block text-sm font-medium text-gray-700 mb-1">Ngày giỗ (âm lịch)</label>
-          <input v-model="form.deathAnniversaryLunar" class="input-field" placeholder="VD: 15/01 hoặc 15/01/2024" />
-          <p class="text-xs text-gray-400 mt-1">Nhập theo định dạng DD/MM hoặc DD/MM/YYYY (âm lịch)</p>
+          <div class="flex items-center gap-2">
+            <select v-model="lunarDay" class="input-field flex-1" @change="lunarAutoFilled = false">
+              <option value="">Ngày</option>
+              <option v-for="d in 30" :key="d" :value="d">{{ d }}</option>
+            </select>
+            <span class="text-gray-400">/</span>
+            <select v-model="lunarMonth" class="input-field flex-1" @change="lunarAutoFilled = false">
+              <option value="">Tháng</option>
+              <option v-for="m in 12" :key="m" :value="m">Tháng {{ m }}</option>
+            </select>
+          </div>
+          <p v-if="lunarAutoFilled" class="text-xs text-primary-500 mt-1">Tự động tính từ ngày mất</p>
         </div>
 
         <!-- Death Anniversary Note -->
@@ -178,6 +188,52 @@ const form = ref({
   deathAnniversaryLunar: props.member?.deathAnniversaryLunar || '',
   deathAnniversaryNote: props.member?.deathAnniversaryNote || '',
   spouseId: null as number | null,
+})
+
+// Lunar date helpers
+function parseLunar(val: string) {
+  if (!val) return { day: '' as '' | number, month: '' as '' | number }
+  const parts = val.split('/')
+  return { day: parseInt(parts[0]) || '', month: parseInt(parts[1]) || '' }
+}
+
+const parsed = parseLunar(form.value.deathAnniversaryLunar)
+const lunarDay = ref<number | ''>(parsed.day)
+const lunarMonth = ref<number | ''>(parsed.month)
+
+watch([lunarDay, lunarMonth], ([d, m]) => {
+  if (d && m) {
+    form.value.deathAnniversaryLunar = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`
+  } else {
+    form.value.deathAnniversaryLunar = ''
+  }
+})
+
+// Auto-convert death date (solar) to lunar anniversary
+const lunarAutoFilled = ref(false)
+
+async function fillLunarFromDeathDate(date: string) {
+  if (!date) return
+  try {
+    const result = await $fetch<{ lunarDay: number; lunarMonth: number }>('/api/utils/solar-to-lunar', {
+      params: { date },
+    })
+    lunarDay.value = result.lunarDay
+    lunarMonth.value = result.lunarMonth
+    lunarAutoFilled.value = true
+  } catch {
+    // ignore
+  }
+}
+
+// Auto-fill on load if lunar is empty but death date exists
+if (!lunarDay.value && !lunarMonth.value && form.value.deathDate) {
+  fillLunarFromDeathDate(form.value.deathDate)
+}
+
+// Auto-fill when death date changes
+watch(() => form.value.deathDate, (newDate) => {
+  if (newDate) fillLunarFromDeathDate(newDate)
 })
 
 // Fetch members of same family line for parent selection

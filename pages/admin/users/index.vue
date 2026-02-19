@@ -16,22 +16,22 @@
       <button @click="openCreateForm" class="btn-primary mt-4">Tạo tài khoản đầu tiên</button>
     </div>
 
-    <div v-else class="card overflow-hidden !p-0">
+    <div v-else class="card overflow-x-auto !p-0">
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-gray-100 bg-gray-50 text-left">
             <th class="px-4 py-3 font-medium text-gray-600">Tên đăng nhập</th>
-            <th class="px-4 py-3 font-medium text-gray-600">Họ tên</th>
+            <th class="px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Họ tên</th>
             <th class="px-4 py-3 font-medium text-gray-600">Vai trò</th>
-            <th class="px-4 py-3 font-medium text-gray-600">Gia phả được xem</th>
-            <th class="px-4 py-3 font-medium text-gray-600">Ngày tạo</th>
+            <th class="px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Gia phả được xem</th>
+            <th class="px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Ngày tạo</th>
             <th class="px-4 py-3 font-medium text-gray-600 text-right">Thao tác</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="user in users" :key="user.id" class="border-b border-gray-50 hover:bg-gray-50">
             <td class="px-4 py-3 font-medium text-gray-900">{{ user.username }}</td>
-            <td class="px-4 py-3 text-gray-700">{{ user.fullName }}</td>
+            <td class="px-4 py-3 text-gray-700 hidden sm:table-cell">{{ user.fullName }}</td>
             <td class="px-4 py-3">
               <span
                 class="inline-block px-2 py-0.5 rounded-full text-xs font-medium"
@@ -40,14 +40,14 @@
                 {{ roleLabel(user.role) }}
               </span>
             </td>
-            <td class="px-4 py-3 text-gray-500 text-xs">
+            <td class="px-4 py-3 text-gray-500 text-xs hidden md:table-cell">
               <span v-if="user.role === 'admin'" class="text-green-600 font-medium">Tất cả</span>
               <span v-else-if="userFamilyLineNames[user.id]?.length">
                 {{ userFamilyLineNames[user.id].join(', ') }}
               </span>
               <span v-else class="text-gray-400">Chưa gán</span>
             </td>
-            <td class="px-4 py-3 text-gray-500">{{ formatDate(user.createdAt) }}</td>
+            <td class="px-4 py-3 text-gray-500 hidden lg:table-cell">{{ formatDate(user.createdAt) }}</td>
             <td class="px-4 py-3">
               <div class="flex items-center justify-end gap-1">
                 <button

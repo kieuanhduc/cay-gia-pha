@@ -283,50 +283,59 @@ export function lunarToSolar(
  *
  * Returns the solar date and the number of days until that date.
  */
+/**
+ * Convert a SolarDate to a day count (days since epoch) for safe
+ * date arithmetic without timezone issues.
+ */
+function toDayCount(s: SolarDate): number {
+  // Use UTC to avoid timezone shifts
+  return Math.floor(Date.UTC(s.year, s.month - 1, s.day) / (1000 * 60 * 60 * 24))
+}
+
+/**
+ * Format a SolarDate as "YYYY-MM-DD" string without timezone conversion.
+ */
+function formatSolarDate(s: SolarDate): string {
+  const y = String(s.year)
+  const m = String(s.month).padStart(2, '0')
+  const d = String(s.day).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 export function getNextLunarAnniversary(
   lunarDay: number,
   lunarMonth: number,
-): { solarDate: Date; daysUntil: number } {
+): { solarDateStr: string; daysUntil: number } {
   const now = new Date()
-  // Normalize to start of day in Vietnam timezone
+  // Get today's date in Vietnam timezone
   const vietnamNow = new Date(
     now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }),
   )
-  const todayStart = new Date(
-    vietnamNow.getFullYear(),
-    vietnamNow.getMonth(),
-    vietnamNow.getDate(),
-  )
+  const today: SolarDate = {
+    year: vietnamNow.getFullYear(),
+    month: vietnamNow.getMonth() + 1,
+    day: vietnamNow.getDate(),
+  }
+  const todayDays = toDayCount(today)
 
   // Get the current lunar year
-  const currentLunar = solarToLunar(
-    vietnamNow.getFullYear(),
-    vietnamNow.getMonth() + 1,
-    vietnamNow.getDate(),
-  )
+  const currentLunar = solarToLunar(today.year, today.month, today.day)
 
   // Try this lunar year first, then next lunar year
-  const candidates: SolarDate[] = []
   for (let yearOffset = 0; yearOffset <= 1; yearOffset++) {
     const tryYear = currentLunar.lunarYear + yearOffset
     const solar = lunarToSolar(tryYear, lunarMonth, lunarDay)
-    candidates.push(solar)
-  }
-
-  for (const solar of candidates) {
-    const solarDate = new Date(solar.year, solar.month - 1, solar.day)
-    const diffMs = solarDate.getTime() - todayStart.getTime()
-    const daysUntil = Math.round(diffMs / (1000 * 60 * 60 * 24))
+    const solarDays = toDayCount(solar)
+    const daysUntil = solarDays - todayDays
     if (daysUntil >= 0) {
-      return { solarDate, daysUntil }
+      return { solarDateStr: formatSolarDate(solar), daysUntil }
     }
   }
 
-  // Fallback: next year + 1 (should not normally reach here)
+  // Fallback: next year + 2 (should not normally reach here)
   const fallbackYear = currentLunar.lunarYear + 2
   const solar = lunarToSolar(fallbackYear, lunarMonth, lunarDay)
-  const solarDate = new Date(solar.year, solar.month - 1, solar.day)
-  const diffMs = solarDate.getTime() - todayStart.getTime()
-  const daysUntil = Math.round(diffMs / (1000 * 60 * 60 * 24))
-  return { solarDate, daysUntil }
+  const solarDays = toDayCount(solar)
+  const daysUntil = solarDays - todayDays
+  return { solarDateStr: formatSolarDate(solar), daysUntil }
 }

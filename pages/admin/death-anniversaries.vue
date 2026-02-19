@@ -49,8 +49,8 @@
           <tr class="border-b border-gray-200 text-left">
             <th class="pb-3 font-semibold text-gray-700">Họ tên</th>
             <th class="pb-3 font-semibold text-gray-700">Ngày giỗ (âm lịch)</th>
-            <th class="pb-3 font-semibold text-gray-700">Ghi chú</th>
-            <th class="pb-3 font-semibold text-gray-700">Dòng họ</th>
+            <th class="pb-3 font-semibold text-gray-700 hidden md:table-cell">Ghi chú</th>
+            <th class="pb-3 font-semibold text-gray-700 hidden sm:table-cell">Dòng họ</th>
             <th v-if="canEdit" class="pb-3 font-semibold text-gray-700 w-24"></th>
           </tr>
         </thead>
@@ -72,10 +72,10 @@
                 {{ item.lunarDate }}
               </span>
             </td>
-            <td class="py-3 text-gray-600 max-w-[200px] truncate">
+            <td class="py-3 text-gray-600 max-w-[200px] truncate hidden md:table-cell">
               {{ item.note || '—' }}
             </td>
-            <td class="py-3 text-gray-500 text-xs">{{ item.familyLine?.name || '—' }}</td>
+            <td class="py-3 text-gray-500 text-xs hidden sm:table-cell">{{ item.familyLine?.name || '—' }}</td>
             <td v-if="canEdit" class="py-3">
               <div class="flex gap-1">
                 <button

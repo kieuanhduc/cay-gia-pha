@@ -23,6 +23,10 @@ export default defineEventHandler(async (event) => {
     data.password = await hashPassword(body.password)
   }
 
+  if (body.email !== undefined) {
+    data.email = body.email?.trim() || null
+  }
+
   const user = await prisma.user.update({
     where: { id },
     data,
@@ -30,6 +34,7 @@ export default defineEventHandler(async (event) => {
       id: true,
       username: true,
       fullName: true,
+      email: true,
       role: true,
       createdAt: true,
       updatedAt: true,

@@ -1,11 +1,14 @@
-export default defineNuxtRouteMiddleware(async () => {
-  const { user, fetchUser } = useAuth()
+export default defineNuxtRouteMiddleware(async (to) => {
+  const { user, fetchUser, isAdmin } = useAuth()
+
+
+  await fetchUser()
 
   if (!user.value) {
-    await fetchUser()
+    return navigateTo('/login', { redirectCode: 302 })
   }
 
-  if (!user.value) {
-    return navigateTo('/login')
+  if (!isAdmin.value) {
+    return navigateTo('/', { redirectCode: 302 })
   }
 })

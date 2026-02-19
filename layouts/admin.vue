@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gray-50">
+  <div v-if="user" class="min-h-screen flex flex-col bg-gray-50">
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div class="flex items-center justify-between px-4 h-14">
         <div class="flex items-center gap-3">
@@ -20,7 +20,7 @@
             <Icon name="ph:eye" class="mr-1" />Xem trang chủ
           </NuxtLink>
           <div class="flex items-center gap-1.5 sm:gap-2">
-            <span class="text-sm text-gray-600 hidden sm:block">{{ user?.fullName }}</span>
+            <span class="text-sm text-gray-600 hidden sm:block">{{ user.fullName }}</span>
             <button @click="logout()" class="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium">
               Đăng xuất
             </button>
@@ -79,6 +79,9 @@ const allMenuItems = [
   { path: '/admin/search', icon: 'ph:magnifying-glass-bold', label: 'Tìm kiếm' },
   { path: '/admin/statistics', icon: 'ph:chart-bar-bold', label: 'Thống kê' },
   { path: '/admin/death-anniversaries', icon: 'ph:candle-bold', label: 'Ngày giỗ' },
+  { path: '/admin/posts', icon: 'ph:newspaper-bold', label: 'Tin tức & Sự kiện' },
+  { path: '/admin/contact', icon: 'ph:envelope-bold', label: 'Tin nhắn liên hệ' },
+  { path: '/admin/about', icon: 'ph:info-bold', label: 'Giới thiệu & Liên hệ' },
   { path: '/admin/share-logs', icon: 'ph:eye-bold', label: 'Lượt xem chia sẻ', adminOnly: true },
   { path: '/admin/data', icon: 'ph:database-bold', label: 'Nhập/Xuất dữ liệu', editorOnly: true },
   { path: '/admin/activity-log', icon: 'ph:clock-bold', label: 'Nhật ký' },

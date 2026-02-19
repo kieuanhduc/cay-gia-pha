@@ -19,8 +19,8 @@
         <thead>
           <tr class="border-b border-gray-100">
             <th class="text-left py-3 px-2 font-medium text-gray-500">Họ tên</th>
-            <th class="text-left py-3 px-2 font-medium text-gray-500">Giới tính</th>
-            <th class="text-left py-3 px-2 font-medium text-gray-500">Đời</th>
+            <th class="text-left py-3 px-2 font-medium text-gray-500 hidden sm:table-cell">Giới tính</th>
+            <th class="text-left py-3 px-2 font-medium text-gray-500 hidden sm:table-cell">Đời</th>
             <th class="text-left py-3 px-2 font-medium text-gray-500 hidden md:table-cell">Ngày sinh</th>
             <th class="text-left py-3 px-2 font-medium text-gray-500 hidden lg:table-cell">Nơi sinh</th>
             <th class="text-left py-3 px-2 font-medium text-gray-500 hidden md:table-cell">Dòng họ</th>
@@ -46,12 +46,12 @@
                 <span class="font-medium text-gray-900">{{ m.fullName }}</span>
               </div>
             </td>
-            <td class="py-3 px-2">
+            <td class="py-3 px-2 hidden sm:table-cell">
               <span :class="m.gender === 'male' ? 'text-blue-600' : 'text-pink-600'">
                 {{ m.gender === 'male' ? 'Nam' : 'Nữ' }}
               </span>
             </td>
-            <td class="py-3 px-2 text-gray-600">Đời {{ m.generation }}</td>
+            <td class="py-3 px-2 text-gray-600 hidden sm:table-cell">Đời {{ m.generation }}</td>
             <td class="py-3 px-2 text-gray-500 hidden md:table-cell">{{ formatDate(m.birthDate) }}</td>
             <td class="py-3 px-2 text-gray-500 hidden lg:table-cell">{{ m.birthPlace || '—' }}</td>
             <td class="py-3 px-2 text-gray-500 hidden md:table-cell">{{ m.familyLine?.name || '—' }}</td>
@@ -88,7 +88,7 @@ defineEmits<{
   selectMember: [member: any]
 }>()
 
-const defaultAvatar = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23e5e7eb" width="40" height="40"/><text x="20" y="25" text-anchor="middle" fill="%239ca3af" font-size="14">?</text></svg>`
+const defaultAvatar = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23e5e7eb" width="40" height="40" rx="20"/><circle cx="20" cy="16" r="7" fill="%239ca3af"/><path d="M5 38c0-8.3 6.7-15 15-15s15 6.7 15 15" fill="%239ca3af"/></svg>`
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '—'

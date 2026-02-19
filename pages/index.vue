@@ -32,7 +32,7 @@
 
           <div class="flex flex-wrap gap-4 justify-center">
             <NuxtLink
-              v-if="familyLines?.length"
+              v-if="isLoggedIn && familyLines?.length"
               :to="`/tree/${familyLines[0].id}`"
               class="inline-flex items-center gap-2 bg-white text-primary-900 px-7 py-3.5 rounded-xl font-semibold hover:bg-primary-50 transition-all shadow-lg shadow-black/10 hover:shadow-xl hover:-translate-y-0.5"
             >
@@ -50,8 +50,7 @@
           </div>
         </div>
 
-        <!-- Stats -->
-        <div v-if="familyLines?.length" class="mt-16 grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-xl mx-auto">
+        <div v-if="isLoggedIn && familyLines?.length" class="mt-16 grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-xl mx-auto">
           <div class="text-center px-4 py-3 bg-white/5 backdrop-blur-sm rounded-xl ring-1 ring-white/10">
             <p class="text-2xl sm:text-3xl font-bold text-amber-300">{{ familyLines.length }}</p>
             <p class="text-sm text-primary-300 mt-1">Dòng họ</p>
@@ -77,29 +76,46 @@
 
     <!-- Family Lines -->
     <section class="max-w-6xl mx-auto px-4 py-16 lg:py-20">
-      <div class="text-center mb-10">
+      <div class="text-center mb-12">
         <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Các dòng họ</h2>
-        <p class="text-gray-500 mt-2">Khám phá và tìm hiểu cội nguồn dòng họ</p>
+        <p class="text-gray-500 mt-2 text-lg">Khám phá và tìm hiểu cội nguồn dòng họ</p>
       </div>
 
-      <LoadingSpinner v-if="pending" />
-
-      <div v-else-if="!familyLines?.length" class="text-center py-16">
-        <div class="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Icon name="ph:users-three" class="text-gray-300 text-4xl" />
+      <div v-if="!isLoggedIn" class="text-center">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-primary-50 rounded-2xl mx-auto mb-6">
+          <Icon name="ph:lock-key-bold" class="text-primary-600 text-4xl" />
         </div>
-        <p class="text-gray-500 text-lg">Chưa có dòng họ nào được tạo</p>
-        <NuxtLink v-if="isLoggedIn" to="/admin/family-lines" class="btn-primary mt-4 inline-block">
-          Tạo dòng họ đầu tiên
+        <p class="text-gray-500 mb-6 max-w-md mx-auto">
+          Thông tin dòng họ chỉ hiển thị cho thành viên đã đăng nhập
+        </p>
+        <NuxtLink
+          to="/login"
+          class="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+        >
+          <Icon name="ph:sign-in-bold" />
+          Đăng nhập
         </NuxtLink>
       </div>
 
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <template v-else>
+        <LoadingSpinner v-if="pending" />
+
+        <div v-else-if="!familyLines?.length" class="text-center py-16">
+          <div class="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Icon name="ph:users-three" class="text-gray-300 text-4xl" />
+          </div>
+          <p class="text-gray-500 text-lg">Chưa có dòng họ nào được tạo</p>
+          <NuxtLink to="/admin/family-lines" class="btn-primary mt-4 inline-block">
+            Tạo dòng họ đầu tiên
+          </NuxtLink>
+        </div>
+
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
         <NuxtLink
           v-for="(fl, index) in familyLines"
           :key="fl.id"
           :to="`/tree/${fl.id}`"
-          class="group relative bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-xl hover:shadow-primary-900/5 hover:border-primary-200 transition-all duration-300 hover:-translate-y-1"
+          class="group relative bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-2xl hover:shadow-primary-900/10 hover:border-primary-200 transition-all duration-300 hover:-translate-y-2"
         >
           <!-- Accent bar -->
           <div
@@ -139,58 +155,189 @@
             </span>
           </div>
         </NuxtLink>
+        </div>
+      </template>
+    </section>
+
+
+
+    <!-- Latest News -->
+    <section v-if="latestNews.length" class="py-16 bg-white">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Tin tức mới nhất</h2>
+            <p class="text-gray-500 mt-1">Cập nhật tin tức về dòng họ</p>
+          </div>
+          <NuxtLink to="/news" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors">
+            Xem tất cả <Icon name="ph:arrow-right" />
+          </NuxtLink>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <NuxtLink
+            v-for="post in latestNews"
+            :key="post.id"
+            :to="`/news/${post.slug}`"
+            class="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary-100 transition-all duration-300 hover:-translate-y-1"
+          >
+            <div class="h-48 bg-gradient-to-br from-blue-50 to-blue-100 overflow-hidden relative">
+              <img
+                v-if="post.coverImage"
+                :src="post.coverImage"
+                :alt="post.title"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div v-else class="w-full h-full flex items-center justify-center">
+                <Icon name="ph:newspaper" class="text-blue-200 text-5xl" />
+              </div>
+              <div class="absolute top-3 right-3 bg-blue-600 text-white px-2.5 py-1 rounded-full text-xs font-medium">
+                Tin tức
+              </div>
+            </div>
+            <div class="p-5">
+              <p class="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                <Icon name="ph:clock" class="text-[10px]" />
+                {{ formatDate(post.createdAt) }}
+              </p>
+              <h3 class="font-bold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors mb-2 text-base">
+                {{ post.title }}
+              </h3>
+              <p v-if="post.excerpt" class="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+                {{ post.excerpt }}
+              </p>
+            </div>
+          </NuxtLink>
+        </div>
       </div>
     </section>
 
-    <!-- Features -->
-    <section class="bg-white py-16 lg:py-20 border-t border-gray-100">
+    <!-- Upcoming Events -->
+    <section v-if="upcomingEvents.length" class="py-16 bg-gradient-to-b from-gray-50 to-white">
       <div class="max-w-6xl mx-auto px-4">
-        <div class="text-center mb-12">
-          <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Tính năng nổi bật</h2>
-          <p class="text-gray-500 mt-2">Mọi thứ bạn cần để quản lý gia phả dòng họ</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-10">
-          <div v-for="feature in features" :key="feature.title" class="group text-center">
-            <div
-              class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"
-              :class="feature.bgColor"
-            >
-              <Icon :name="feature.icon" class="text-2xl" :class="feature.iconColor" />
-            </div>
-            <h3 class="font-semibold text-gray-900 text-base">{{ feature.title }}</h3>
-            <p class="text-sm text-gray-500 mt-2 leading-relaxed">{{ feature.desc }}</p>
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Sự kiện sắp diễn ra</h2>
+            <p class="text-gray-500 mt-1">Các hoạt động và sự kiện của dòng họ</p>
           </div>
+          <NuxtLink to="/events" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors">
+            Xem tất cả <Icon name="ph:arrow-right" />
+          </NuxtLink>
+        </div>
+        <div class="space-y-4">
+          <NuxtLink
+            v-for="post in upcomingEvents"
+            :key="post.id"
+            :to="`/events/${post.slug}`"
+            class="flex items-start sm:items-center gap-4 bg-white p-5 rounded-xl border border-gray-100 hover:shadow-xl hover:border-purple-100 transition-all duration-300 hover:-translate-y-1 group"
+          >
+            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 shadow-lg shadow-purple-200 group-hover:shadow-xl group-hover:shadow-purple-300 transition-all">
+              <span class="text-[10px] font-bold text-purple-100 uppercase tracking-wide">
+                {{ post.eventDate ? new Date(post.eventDate).toLocaleDateString('vi-VN', { month: 'short' }) : 'TBD' }}
+              </span>
+              <span class="text-2xl sm:text-3xl font-black text-white leading-none mt-0.5">
+                {{ post.eventDate ? new Date(post.eventDate).getDate() : '?' }}
+              </span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
+                  <Icon name="ph:calendar-bold" class="text-[10px]" />Sự kiện
+                </span>
+                <span v-if="post.eventPlace" class="text-xs text-gray-500 flex items-center gap-1">
+                  <Icon name="ph:map-pin-fill" class="text-purple-400" />
+                  {{ post.eventPlace }}
+                </span>
+              </div>
+              <h3 class="font-bold text-gray-900 group-hover:text-primary-600 transition-colors mb-1 text-base sm:text-lg">
+                {{ post.title }}
+              </h3>
+              <p v-if="post.excerpt" class="text-sm text-gray-500 line-clamp-1 sm:line-clamp-2 leading-relaxed">
+                {{ post.excerpt }}
+              </p>
+            </div>
+            <Icon name="ph:arrow-right-bold" class="hidden sm:block text-gray-300 group-hover:text-primary-600 group-hover:translate-x-1 transition-all flex-shrink-0 text-xl" />
+          </NuxtLink>
         </div>
       </div>
     </section>
 
     <!-- CTA -->
-    <section v-if="!isLoggedIn" class="bg-gradient-to-r from-primary-900 to-primary-800 py-16">
-      <div class="max-w-3xl mx-auto px-4 text-center">
-        <h2 class="text-2xl lg:text-3xl font-bold text-white mb-4">
-          Bắt đầu xây dựng gia phả
+    <section v-if="!isLoggedIn" class="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 py-20">
+      <!-- Decorative elements -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl" />
+        <div class="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-amber-400 rounded-full blur-3xl" />
+      </div>
+      
+      <div class="relative max-w-4xl mx-auto px-4 text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl mb-6 ring-1 ring-white/20">
+          <Icon name="ph:user-circle-plus-bold" class="text-amber-300 text-3xl" />
+        </div>
+        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">
+          Bắt đầu xây dựng gia phả của bạn
         </h2>
-        <p class="text-primary-200 mb-8">
-          Đăng nhập để quản lý và chỉnh sửa cây gia phả của dòng họ bạn
+        <p class="text-lg text-primary-100 mb-10 max-w-2xl mx-auto leading-relaxed">
+          Đăng nhập để quản lý và chỉnh sửa cây gia phả, kết nối với dòng họ và gìn giữ truyền thống gia đình
         </p>
         <NuxtLink
           to="/login"
-          class="inline-flex items-center gap-2 bg-white text-primary-900 px-8 py-3.5 rounded-xl font-semibold hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+          class="inline-flex items-center gap-2 bg-white text-primary-900 px-10 py-4 rounded-xl font-bold hover:bg-primary-50 transition-all shadow-2xl hover:shadow-white/20 hover:-translate-y-1 text-lg"
         >
-          <Icon name="ph:sign-in-bold" class="text-lg" />
-          Đăng nhập
+          <Icon name="ph:sign-in-bold" class="text-xl" />
+          Đăng nhập ngay
         </NuxtLink>
+      </div>
+    </section>
+
+        <!-- Features -->
+        <section class="bg-gradient-to-b from-white to-gray-50 py-16 lg:py-24 border-t border-gray-100">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">Tính năng nổi bật</h2>
+          <p class="text-gray-500 mt-3 text-lg max-w-2xl mx-auto">Mọi thứ bạn cần để quản lý và lưu giữ gia phả dòng họ một cách hiện đại</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div v-for="feature in features" :key="feature.title" class="group text-center">
+            <div class="relative">
+              <div
+                class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6 shadow-lg group-hover:shadow-xl"
+                :class="feature.bgColor"
+              >
+                <Icon :name="feature.icon" class="text-2xl transition-transform group-hover:scale-110" :class="feature.iconColor" />
+              </div>
+              <div class="absolute inset-0 w-16 h-16 mx-auto rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity" :class="feature.bgColor" />
+            </div>
+            <h3 class="font-bold text-gray-900 text-base mb-2 group-hover:text-primary-600 transition-colors">{{ feature.title }}</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">{{ feature.desc }}</p>
+          </div>
+        </div>
       </div>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
-
 const { isLoggedIn } = useAuth()
-const { data: familyLines, pending } = await useFetch<any[]>('/api/family-lines')
+
+// Chỉ fetch family lines khi đã login
+const { data: familyLines, pending } = isLoggedIn.value 
+  ? await useFetch<any[]>('/api/family-lines')
+  : { data: ref([]), pending: ref(false) }
+
+const { data: newsData } = await useFetch<any>('/api/posts', {
+  query: { type: 'news', published: 'true', limit: 3 },
+})
+const latestNews = computed(() => newsData.value?.items || [])
+
+const { data: eventsData } = await useFetch<any>('/api/posts', {
+  query: { type: 'event', published: 'true', limit: 3 },
+})
+const upcomingEvents = computed(() => eventsData.value?.items || [])
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
 
 const totalMembers = computed(() =>
   familyLines.value?.reduce((sum, fl) => sum + (fl.memberCount || 0), 0) || 0
@@ -198,7 +345,7 @@ const totalMembers = computed(() =>
 
 const maxGeneration = computed(() => {
   if (!familyLines.value?.length) return 0
-  return Math.max(...familyLines.value.map(fl => fl.maxGeneration || 0), 0) || '—'
+  return Math.max(...familyLines.value.map((fl: any) => fl.maxGeneration || 0), 0)
 })
 
 const accentColors = [

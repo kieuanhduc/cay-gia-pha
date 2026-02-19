@@ -35,9 +35,9 @@
             <tr class="border-b border-gray-100 bg-gray-50 text-left">
               <th class="px-4 py-3 font-medium text-gray-600">Thời gian</th>
               <th class="px-4 py-3 font-medium text-gray-600">Dòng họ</th>
-              <th class="px-4 py-3 font-medium text-gray-600">Địa chỉ IP</th>
-              <th class="px-4 py-3 font-medium text-gray-600">Thiết bị</th>
-              <th class="px-4 py-3 font-medium text-gray-600">Nguồn</th>
+              <th class="px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Địa chỉ IP</th>
+              <th class="px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Thiết bị</th>
+              <th class="px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Nguồn</th>
             </tr>
           </thead>
           <tbody>
@@ -52,13 +52,13 @@
               <td class="px-4 py-3">
                 <span class="font-medium text-gray-900">{{ log.familyLine?.name || '—' }}</span>
               </td>
-              <td class="px-4 py-3 text-gray-600 font-mono text-xs">
+              <td class="px-4 py-3 text-gray-600 font-mono text-xs hidden sm:table-cell">
                 {{ log.ip || '—' }}
               </td>
-              <td class="px-4 py-3 text-gray-500 text-xs max-w-[250px]">
+              <td class="px-4 py-3 text-gray-500 text-xs max-w-[250px] hidden md:table-cell">
                 <span :title="log.userAgent">{{ parseDevice(log.userAgent) }}</span>
               </td>
-              <td class="px-4 py-3 text-gray-500 text-xs max-w-[200px] truncate">
+              <td class="px-4 py-3 text-gray-500 text-xs max-w-[200px] truncate hidden lg:table-cell">
                 {{ log.referer || '—' }}
               </td>
             </tr>

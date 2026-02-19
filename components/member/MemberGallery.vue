@@ -51,11 +51,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Ngày chụp</label>
-            <input
-              v-model="uploadTakenDate"
-              type="date"
-              class="input-field"
-            />
+            <DatePicker v-model="uploadTakenDate" placeholder="Chọn ngày chụp" />
           </div>
           <div class="flex gap-2">
             <button
@@ -159,11 +155,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Ngày chụp</label>
-          <input
-            v-model="editTakenDate"
-            type="date"
-            class="input-field"
-          />
+          <DatePicker v-model="editTakenDate" placeholder="Chọn ngày chụp" />
         </div>
       </div>
       <template #footer>

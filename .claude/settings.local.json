@@ -20,7 +20,10 @@
       "Bash(npx prisma db push:*)",
       "Bash(npm ls:*)",
       "Bash(mysqldump:*)",
-      "Bash(brew list:*)"
+      "Bash(brew list:*)",
+      "Bash(npx nuxi dev:*)",
+      "Bash(node -e:*)",
+      "Bash(pkill:*)"
     ]
   }
 }

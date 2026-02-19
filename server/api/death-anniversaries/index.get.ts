@@ -1,14 +1,29 @@
 import prisma from '~/server/utils/prisma'
+import { getAccessibleFamilyLineIds } from '~/server/utils/familyLineAccess'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const familyLineId = query.familyLineId ? Number(query.familyLineId) : undefined
   const month = query.month ? Number(query.month) : undefined
 
-  const where: any = {}
-  if (familyLineId) where.familyLineId = familyLineId
+  // Admin: null (xem tất cả), non-admin: mảng id được phép xem
+  const accessibleIds = await getAccessibleFamilyLineIds(event)
 
-  // Filter by lunar month from lunarDate field (format: "DD/MM")
+  const where: any = {}
+
+  if (accessibleIds !== null) {
+    // Non-admin: chỉ xem ngày giỗ thuộc dòng họ được gán
+    where.familyLineId = { in: accessibleIds }
+  }
+
+  if (familyLineId) {
+    // Nếu user chọn filter thêm 1 dòng họ cụ thể
+    if (accessibleIds !== null && !accessibleIds.includes(familyLineId)) {
+      return [] // không có quyền xem dòng họ đó
+    }
+    where.familyLineId = familyLineId
+  }
+
   if (month) {
     where.lunarDate = { contains: `/${month.toString().padStart(2, '0')}` }
   }
@@ -22,7 +37,7 @@ export default defineEventHandler(async (event) => {
     orderBy: [{ lunarDate: 'asc' }, { fullName: 'asc' }],
   })
 
-  // If month filter, do exact match (the contains might match partial)
+  // Exact match cho tháng âm lịch (contains có thể match partial)
   let filtered = items
   if (month) {
     filtered = items.filter((item) => {

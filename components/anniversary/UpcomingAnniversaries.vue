@@ -32,7 +32,7 @@
     <div v-else class="space-y-2">
       <div
         v-for="item in anniversaries"
-        :key="item.memberId"
+        :key="`${item.source}-${item.memberId || item.fullName}`"
         class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
       >
         <!-- Icon -->
@@ -49,15 +49,17 @@
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="font-medium text-sm text-gray-900 truncate">{{ item.fullName }}</span>
-            <span class="text-xs text-gray-400">Đời {{ item.generation }}</span>
+            <span v-if="item.generation" class="text-xs text-gray-400">Đời {{ item.generation }}</span>
           </div>
           <div class="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
             <span>{{ item.lunarDate }} âm lịch</span>
             <span class="text-gray-300">&middot;</span>
             <span>DL: {{ formatSolarDate(item.solarDate) }}</span>
           </div>
-          <div v-if="item.familyLineName" class="text-xs text-gray-400 mt-0.5">
-            {{ item.familyLineName }}
+          <div v-if="item.familyLineName || item.note" class="text-xs text-gray-400 mt-0.5">
+            <span v-if="item.familyLineName">{{ item.familyLineName }}</span>
+            <span v-if="item.familyLineName && item.note"> · </span>
+            <span v-if="item.note" class="italic">{{ item.note }}</span>
           </div>
         </div>
 
@@ -78,13 +80,15 @@
 
 <script setup lang="ts">
 interface AnniversaryItem {
-  memberId: number
+  memberId: number | null
   fullName: string
-  generation: number
+  generation: number | null
   familyLineName: string
   lunarDate: string
   solarDate: string
   daysUntil: number
+  note?: string | null
+  source: 'member' | 'anniversary'
 }
 
 const loading = ref(true)

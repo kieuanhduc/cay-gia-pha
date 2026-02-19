@@ -23,24 +23,20 @@ export const useAuth = () => {
   async function logout() {
     await $fetch('/api/auth/logout', { method: 'POST' })
     user.value = null
-    navigateTo('/login')
+    navigateTo('/')
   }
 
   async function fetchUser() {
     try {
-      const headers: Record<string, string> = {}
-
-      // Forward cookies when running on server (SSR)
+    
       if (import.meta.server) {
-        const event = useRequestEvent()
-        const cookie = event?.node?.req?.headers?.cookie
-        if (cookie) {
-          headers.cookie = cookie
-        }
+        const $api = useRequestFetch()
+        const data = await $api('/api/auth/me') as any
+        user.value = data.user
+      } else {
+        const data = await $fetch('/api/auth/me')
+        user.value = data.user
       }
-
-      const data = await $fetch('/api/auth/me', { headers })
-      user.value = data.user
     } catch {
       user.value = null
     }

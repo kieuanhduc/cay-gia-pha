@@ -14,13 +14,19 @@ export default defineEventHandler(async (event) => {
     where,
     include: {
       _count: { select: { members: true } },
+      members: { select: { generation: true } },
     },
     orderBy: { createdAt: 'desc' },
   })
 
-  return familyLines.map((fl) => ({
-    ...fl,
-    memberCount: fl._count.members,
-    _count: undefined,
-  }))
+  return familyLines.map((fl) => {
+    const generations = fl.members.map((m) => m.generation).filter(Boolean)
+    return {
+      ...fl,
+      memberCount: fl._count.members,
+      maxGeneration: generations.length ? Math.max(...generations) : 0,
+      _count: undefined,
+      members: undefined,
+    }
+  })
 })

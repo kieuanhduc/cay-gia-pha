@@ -1,5 +1,6 @@
 import prisma from '~/server/utils/prisma'
 import { requireRole } from '~/server/utils/auth'
+import { getAccessibleFamilyLineIds } from '~/server/utils/familyLineAccess'
 
 export default defineEventHandler(async (event) => {
   requireRole(event, 'admin', 'editor')
@@ -9,6 +10,17 @@ export default defineEventHandler(async (event) => {
   const existing = await prisma.deathAnniversary.findUnique({ where: { id } })
   if (!existing) {
     throw createError({ statusCode: 404, message: 'Không tìm thấy ngày giỗ' })
+  }
+
+  // Kiểm tra quyền với dòng họ hiện tại của record
+  const accessibleIds = await getAccessibleFamilyLineIds(event)
+  if (accessibleIds !== null) {
+    if (existing.familyLineId && !accessibleIds.includes(existing.familyLineId)) {
+      throw createError({ statusCode: 403, message: 'Bạn không có quyền sửa ngày giỗ này' })
+    }
+    if (body.familyLineId && !accessibleIds.includes(Number(body.familyLineId))) {
+      throw createError({ statusCode: 403, message: 'Bạn không có quyền gán dòng họ này' })
+    }
   }
 
   if (!body.fullName?.trim()) {

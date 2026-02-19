@@ -41,10 +41,10 @@
         <thead>
           <tr class="border-b border-gray-100">
             <th class="text-left py-3 px-2 font-medium text-gray-500">Họ tên</th>
-            <th class="text-left py-3 px-2 font-medium text-gray-500">Giới tính</th>
-            <th class="text-left py-3 px-2 font-medium text-gray-500">Đời</th>
-            <th class="text-left py-3 px-2 font-medium text-gray-500">Dòng họ</th>
-            <th class="text-left py-3 px-2 font-medium text-gray-500">Cha</th>
+            <th class="text-left py-3 px-2 font-medium text-gray-500 hidden sm:table-cell">Giới tính</th>
+            <th class="text-left py-3 px-2 font-medium text-gray-500 hidden sm:table-cell">Đời</th>
+            <th class="text-left py-3 px-2 font-medium text-gray-500 hidden md:table-cell">Dòng họ</th>
+            <th class="text-left py-3 px-2 font-medium text-gray-500 hidden lg:table-cell">Cha</th>
             <th v-if="canEdit" class="text-right py-3 px-2 font-medium text-gray-500">Thao tác</th>
           </tr>
         </thead>
@@ -53,22 +53,22 @@
             <td class="py-3 px-2">
               <div class="flex items-center gap-2">
                 <img
-                  :src="m.avatarUrl || '/uploads/avatars/.gitkeep'"
+                  :src="m.avatarUrl || defaultAvatar"
                   :alt="m.fullName"
                   class="w-8 h-8 rounded-full object-cover bg-gray-200"
-                  @error="($event.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23e5e7eb%22 width=%2240%22 height=%2240%22/><text x=%2220%22 y=%2225%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2214%22>?</text></svg>'"
+                  @error="($event.target as HTMLImageElement).src = defaultAvatar"
                 />
                 <span class="font-medium text-gray-900">{{ m.fullName }}</span>
               </div>
             </td>
-            <td class="py-3 px-2">
+            <td class="py-3 px-2 hidden sm:table-cell">
               <span :class="m.gender === 'male' ? 'text-blue-600' : 'text-pink-600'">
                 {{ m.gender === 'male' ? 'Nam' : 'Nữ' }}
               </span>
             </td>
-            <td class="py-3 px-2">Đời {{ m.generation }}</td>
-            <td class="py-3 px-2 text-gray-500">{{ m.familyLine?.name }}</td>
-            <td class="py-3 px-2 text-gray-500">{{ m.father?.fullName || '—' }}</td>
+            <td class="py-3 px-2 hidden sm:table-cell">Đời {{ m.generation }}</td>
+            <td class="py-3 px-2 text-gray-500 hidden md:table-cell">{{ m.familyLine?.name }}</td>
+            <td class="py-3 px-2 text-gray-500 hidden lg:table-cell">{{ m.father?.fullName || '—' }}</td>
             <td v-if="canEdit" class="py-3 px-2 text-right">
               <div class="flex items-center justify-end gap-1">
                 <NuxtLink :to="`/admin/members/${m.id}`" class="p-1.5 rounded hover:bg-gray-100 text-gray-500" title="Sửa">
@@ -105,6 +105,8 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' })
+
+const defaultAvatar = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23e5e7eb" width="40" height="40" rx="20"/><circle cx="20" cy="16" r="7" fill="%239ca3af"/><path d="M5 38c0-8.3 6.7-15 15-15s15 6.7 15 15" fill="%239ca3af"/></svg>`
 
 const { canEdit } = useAuth()
 const filters = ref({ familyLineId: '', search: '', generation: '', page: 1 })

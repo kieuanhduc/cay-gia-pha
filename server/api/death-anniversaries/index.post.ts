@@ -1,5 +1,6 @@
 import prisma from '~/server/utils/prisma'
 import { requireRole } from '~/server/utils/auth'
+import { getAccessibleFamilyLineIds } from '~/server/utils/familyLineAccess'
 
 export default defineEventHandler(async (event) => {
   requireRole(event, 'admin', 'editor')
@@ -22,6 +23,14 @@ export default defineEventHandler(async (event) => {
   const month = Number(dateMatch[2])
   if (day < 1 || day > 30 || month < 1 || month > 12) {
     throw createError({ statusCode: 400, message: 'Ngày hoặc tháng không hợp lệ' })
+  }
+
+  // Kiểm tra quyền với dòng họ được chọn (non-admin)
+  if (body.familyLineId) {
+    const accessibleIds = await getAccessibleFamilyLineIds(event)
+    if (accessibleIds !== null && !accessibleIds.includes(Number(body.familyLineId))) {
+      throw createError({ statusCode: 403, message: 'Bạn không có quyền thêm ngày giỗ cho dòng họ này' })
+    }
   }
 
   const created = await prisma.deathAnniversary.create({
