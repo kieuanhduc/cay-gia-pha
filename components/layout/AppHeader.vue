@@ -6,8 +6,8 @@
         <span class="font-bold text-lg text-gray-900">Cây Gia Phả</span>
       </NuxtLink>
 
-      <!-- Desktop nav -->
-      <nav class="hidden md:flex items-center gap-1">
+      <!-- Desktop nav (chỉ hiện từ lg = 1024px trở lên) -->
+      <nav class="hidden lg:flex items-center gap-1">
         <NuxtLink
           v-for="item in navItems"
           :key="item.path"
@@ -21,7 +21,7 @@
 
       <div class="flex items-center gap-3">
         <!-- Logged in -->
-        <div v-if="isLoggedIn" class="hidden md:flex items-center gap-3">
+        <div v-if="isLoggedIn" class="hidden lg:flex items-center gap-3">
           <span class="text-sm text-gray-600">{{ user?.fullName }}</span>
           <NuxtLink
             to="/admin"
@@ -41,15 +41,15 @@
         <NuxtLink
           v-else
           to="/login"
-          class="hidden md:inline-flex items-center gap-1.5 text-sm bg-primary-700 text-white px-4 py-2 rounded-lg hover:bg-primary-800 font-medium transition-colors"
+          class="hidden lg:inline-flex items-center gap-1.5 text-sm bg-primary-700 text-white px-4 py-2 rounded-lg hover:bg-primary-800 font-medium transition-colors"
         >
           <Icon name="ph:sign-in-bold" />
           Đăng nhập
         </NuxtLink>
 
-        <!-- Mobile hamburger -->
+        <!-- Hamburger (hiện đến lg = 1024px) -->
         <button
-          class="md:hidden p-1.5 rounded-lg hover:bg-gray-100 text-gray-600"
+          class="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 text-gray-600"
           :aria-label="menuOpen ? 'Đóng menu' : 'Mở menu'"
           :aria-expanded="menuOpen"
           @click="menuOpen = !menuOpen"
@@ -59,8 +59,8 @@
       </div>
     </div>
 
-    <!-- Mobile menu -->
-    <div v-if="menuOpen" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4 pt-2 space-y-1">
+    <!-- Mobile/tablet menu (ẩn từ lg trở lên) -->
+    <div v-if="menuOpen" class="lg:hidden bg-white border-t border-gray-100 px-4 pb-4 pt-2 space-y-1">
       <NuxtLink
         v-for="item in navItems"
         :key="item.path"
