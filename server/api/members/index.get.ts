@@ -1,6 +1,8 @@
 import prisma from '~/server/utils/prisma'
+import { requireAuth } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
+  requireAuth(event)
   const query = getQuery(event)
   const page = Number(query.page) || 1
   const limit = Number(query.limit) || 50
