@@ -89,11 +89,11 @@
           <div
             v-for="day in daysInMonth"
             :key="day"
-            class="bg-white p-1.5 min-h-[80px] md:min-h-[100px] cursor-pointer hover:bg-primary-50 transition-colors relative"
-            :class="{
-              'ring-2 ring-primary-400 ring-inset': isToday(day),
-              'bg-primary-50': selectedDay === day,
-            }"
+            class="bg-white p-1.5 min-h-[80px] md:min-h-[100px] transition-colors relative"
+            :class="[
+              getDayItems(day).length > 0 ? 'cursor-pointer hover:bg-amber-50' : '',
+              isToday(day) ? 'ring-2 ring-primary-400 ring-inset' : '',
+            ]"
             @click="selectDay(day)"
           >
             <!-- Day number + lunar date -->
@@ -127,7 +127,7 @@
               </div>
               <div
                 v-if="getDayItems(day).length > 2"
-                class="text-xs text-gray-400 pl-1"
+                class="text-xs text-amber-600 pl-1 font-medium"
               >
                 +{{ getDayItems(day).length - 2 }} nữa
               </div>
@@ -144,50 +144,99 @@
       </template>
     </div>
 
-    <!-- Detail panel for selected day -->
-    <Transition name="slide-down">
-      <div v-if="selectedDay && getDayItems(selectedDay).length" class="card mt-4">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold text-gray-900 flex items-center gap-2">
-            <Icon name="ph:flower" class="text-amber-500" />
-            Ngày {{ selectedDay }} tháng {{ currentMonth }}
-          </h3>
-          <button @click="selectedDay = null" class="p-1 rounded hover:bg-gray-100 text-gray-400">
-            <Icon name="ph:x-bold" />
-          </button>
-        </div>
-
-        <div class="space-y-2">
-          <div
-            v-for="item in getDayItems(selectedDay)"
-            :key="`${item.source}-${item.memberId ?? item.fullName}`"
-            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-amber-50 transition-colors"
-          >
-            <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-              <Icon name="ph:flower" class="text-amber-600" />
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="font-medium text-gray-900">{{ item.fullName }}</div>
-              <div class="text-xs text-gray-500 mt-0.5 flex flex-wrap gap-x-2">
-                <span>
-                  <Icon name="ph:moon-bold" class="text-amber-500 mr-0.5" style="font-size:10px" />
-                  Ngày {{ item.lunarDate }} âm lịch
-                </span>
-                <span v-if="item.generation">· Đời {{ item.generation }}</span>
-                <span v-if="item.familyLineName">· {{ item.familyLineName }}</span>
-              </div>
-              <div v-if="item.note" class="text-xs text-gray-400 mt-0.5 italic">{{ item.note }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Transition>
-
     <!-- Empty month state -->
     <div v-if="!loading && totalAnniversaries === 0" class="card mt-4 text-center py-8">
       <Icon name="ph:calendar-blank" class="text-gray-300 text-5xl mb-2" />
       <p class="text-gray-400 text-sm">Không có ngày giỗ nào trong tháng này</p>
     </div>
+
+    <!-- Modal popup khi click ngày giỗ -->
+    <Transition name="modal">
+      <div
+        v-if="selectedDay !== null"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        @click.self="selectedDay = null"
+      >
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40" @click="selectedDay = null" />
+
+        <!-- Modal box -->
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden">
+          <!-- Header -->
+          <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+            <div>
+              <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                <Icon name="ph:flower" class="text-amber-500" />
+                Ngày {{ selectedDay }} tháng {{ currentMonth }} dương lịch
+              </h3>
+              <p class="text-xs text-gray-400 mt-0.5">
+                {{ getDayItems(selectedDay!).length }} ngày giỗ
+              </p>
+            </div>
+            <button
+              @click="selectedDay = null"
+              class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
+            >
+              <Icon name="ph:x-bold" />
+            </button>
+          </div>
+
+          <!-- List -->
+          <div class="overflow-y-auto p-4 space-y-3">
+            <div
+              v-for="item in getDayItems(selectedDay!)"
+              :key="`${item.source}-${item.memberId ?? item.fullName}`"
+              class="flex items-start gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50 hover:bg-amber-50 hover:border-amber-200 transition-colors"
+            >
+              <!-- Avatar -->
+              <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center shrink-0 overflow-hidden border-2 border-amber-200">
+                <img
+                  v-if="item.avatarUrl"
+                  :src="item.avatarUrl"
+                  :alt="item.fullName"
+                  class="w-full h-full object-cover"
+                />
+                <Icon v-else name="ph:user-bold" class="text-amber-500 text-xl" />
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="font-semibold text-gray-900">{{ item.fullName }}</div>
+                  <NuxtLink
+                    v-if="item.memberId"
+                    :to="`/admin/members/${item.memberId}`"
+                    class="shrink-0 text-xs px-2 py-0.5 rounded-full bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors flex items-center gap-1"
+                    @click="selectedDay = null"
+                  >
+                    <Icon name="ph:arrow-square-out" style="font-size:11px" />
+                    Xem
+                  </NuxtLink>
+                </div>
+
+                <div class="text-xs text-gray-500 mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
+                  <span class="flex items-center gap-1">
+                    <Icon name="ph:moon-bold" class="text-amber-500" style="font-size:11px" />
+                    {{ item.lunarDate }} âm lịch
+                  </span>
+                  <span v-if="item.generation" class="flex items-center gap-1">
+                    <Icon name="ph:tree-structure" style="font-size:11px" class="text-gray-400" />
+                    Đời {{ item.generation }}
+                  </span>
+                  <span v-if="item.familyLineName" class="flex items-center gap-1">
+                    <Icon name="ph:users" style="font-size:11px" class="text-gray-400" />
+                    {{ item.familyLineName }}
+                  </span>
+                </div>
+
+                <div v-if="item.note" class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded px-2 py-1 mt-1.5 italic">
+                  {{ item.note }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -203,6 +252,7 @@ interface CalendarItem {
   lunarDate: string
   note?: string | null
   source: 'member' | 'anniversary'
+  avatarUrl?: string | null
 }
 
 const nuxtApp = useNuxtApp()
@@ -246,10 +296,8 @@ const daysInMonth = computed(() => {
   return new Date(currentYear.value, currentMonth.value, 0).getDate()
 })
 
-// Day of week for the 1st of the month (0=Sun, 1=Mon, ...)
 const firstDayOfWeek = computed(() => {
   const d = new Date(currentYear.value, currentMonth.value - 1, 1).getDay()
-  // Convert Sunday=0 → 6, Monday=1 → 0
   return d === 0 ? 6 : d - 1
 })
 
@@ -281,11 +329,8 @@ function isSunday(day: number): boolean {
 }
 
 function selectDay(day: number) {
-  if (getDayItems(day).length === 0) {
-    selectedDay.value = null
-    return
-  }
-  selectedDay.value = selectedDay.value === day ? null : day
+  if (getDayItems(day).length === 0) return
+  selectedDay.value = day
 }
 
 function prevMonth() {
@@ -316,13 +361,16 @@ function goToToday() {
 </script>
 
 <style scoped>
-.slide-down-enter-active,
-.slide-down-leave-active {
+.modal-enter-active,
+.modal-leave-active {
   transition: all 0.2s ease;
 }
-.slide-down-enter-from,
-.slide-down-leave-to {
+.modal-enter-from,
+.modal-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
+}
+.modal-enter-from .relative,
+.modal-leave-to .relative {
+  transform: scale(0.95);
 }
 </style>

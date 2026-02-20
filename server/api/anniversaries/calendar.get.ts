@@ -12,6 +12,7 @@ export interface CalendarAnniversaryItem {
   lunarDate: string
   note?: string | null
   source: 'member' | 'anniversary'
+  avatarUrl?: string | null
 }
 
 export interface CalendarResponse {
@@ -92,6 +93,7 @@ export default defineEventHandler(async (event): Promise<CalendarResponse> => {
       generation: true,
       deathAnniversaryLunar: true,
       deathDate: true,
+      avatarUrl: true,
       familyLine: { select: { name: true } },
     },
   })
@@ -136,6 +138,7 @@ export default defineEventHandler(async (event): Promise<CalendarResponse> => {
         familyLineName: member.familyLine.name,
         lunarDate: lunarDateStr,
         source: 'member',
+        avatarUrl: member.avatarUrl,
       })
     } catch {
       continue

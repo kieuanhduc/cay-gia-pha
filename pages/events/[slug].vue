@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-3xl mx-auto px-4 py-10">
+  <div class="max-w-6xl mx-auto px-4 py-10">
     <NuxtLink to="/events" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6">
       <Icon name="ph:arrow-left" />
       Quay lại sự kiện
@@ -40,11 +40,7 @@
 const route = useRoute()
 const slug = route.params.slug as string
 
-const { data: listData, pending } = useLazyFetch<any>('/api/posts', {
-  query: { type: 'event', published: 'true', limit: 1000 },
-})
-
-const post = computed(() => listData.value?.items?.find((p: any) => p.slug === slug) || null)
+const { data: post, pending } = useLazyFetch<any>(`/api/posts/by-slug/${slug}`)
 
 watchEffect(() => {
   if (post.value) useHead({ title: `${post.value.title} - Cây Gia Phả` })

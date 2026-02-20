@@ -43,7 +43,12 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium text-gray-700">Mật khẩu</label>
+            <NuxtLink to="/change-password" class="text-xs text-primary-600 hover:text-primary-700">
+              Quên mật khẩu?
+            </NuxtLink>
+          </div>
           <input
             v-model="password"
             type="password"
@@ -67,7 +72,11 @@
         </button>
       </form>
 
-      <div class="mt-6 text-center">
+      <div class="mt-6 text-center space-y-2">
+        <p class="text-sm text-gray-500">
+          Chưa có tài khoản?
+          <NuxtLink to="/register" class="text-primary-600 hover:text-primary-700 font-medium">Tạo tài khoản</NuxtLink>
+        </p>
         <NuxtLink to="/" class="text-sm text-primary-600 hover:text-primary-700">
           ← Quay về trang chủ
         </NuxtLink>
