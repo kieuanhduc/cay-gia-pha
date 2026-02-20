@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Quản lý dòng họ</h1>
-      <button v-if="canEdit" @click="showForm = true" class="btn-primary inline-flex items-center gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Quản lý dòng họ</h1>
+      <button v-if="canEdit" @click="showForm = true" class="btn-primary inline-flex items-center gap-2 shrink-0">
         <Icon name="ph:plus-bold" />
         Thêm dòng họ
       </button>
@@ -17,47 +17,87 @@
     </div>
 
     <div v-else class="space-y-3">
-      <div v-for="fl in familyLines" :key="fl.id" class="card flex items-center justify-between">
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2">
-            <h3 class="font-semibold text-gray-900">{{ fl.name }}</h3>
-            <span
-              v-if="fl.isPublic"
-              class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"
-            >
-              <Icon name="ph:globe" class="text-[10px]" />
-              Chia sẻ
-            </span>
+      <div
+        v-for="(fl, index) in familyLines"
+        :key="fl.id"
+        class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+      >
+        <div class="flex flex-col sm:flex-row sm:items-center gap-0">
+          <!-- Left accent bar -->
+          <div class="hidden sm:block w-1 self-stretch shrink-0" :class="accentColors[index % accentColors.length]" />
+
+          <!-- Main content -->
+          <div class="flex-1 min-w-0 px-4 pt-4 pb-3 sm:py-4">
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <!-- Mobile accent dot -->
+              <div class="w-2.5 h-2.5 rounded-full sm:hidden shrink-0" :class="accentColors[index % accentColors.length]" />
+              <h3 class="font-semibold text-gray-900 text-base">{{ fl.name }}</h3>
+              <span
+                v-if="fl.isPublic"
+                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"
+              >
+                <Icon name="ph:globe" class="text-[10px]" />
+                Công khai
+              </span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-sm text-gray-500">
+              <span v-if="fl.originPlace" class="flex items-center gap-1">
+                <Icon name="ph:map-pin" class="text-gray-400 shrink-0" />
+                {{ fl.originPlace }}
+              </span>
+              <span class="flex items-center gap-1">
+                <Icon name="ph:users-bold" class="text-gray-400 shrink-0" />
+                {{ fl.memberCount }} thành viên
+              </span>
+            </div>
+
+            <p v-if="fl.isPublic && shareInfoMap[fl.id]" class="text-xs text-blue-500 mt-1 flex items-center gap-1">
+              <Icon name="ph:user-circle" class="shrink-0" />
+              Chia sẻ bởi <strong>{{ shareInfoMap[fl.id].userName }}</strong>
+              <span class="text-blue-300">· {{ timeAgo(shareInfoMap[fl.id].createdAt) }}</span>
+            </p>
           </div>
-          <p v-if="fl.originPlace" class="text-sm text-gray-500 mt-0.5">
-            <Icon name="ph:map-pin" class="mr-1" />{{ fl.originPlace }}
-          </p>
-          <p class="text-sm text-gray-400 mt-0.5">{{ fl.memberCount }} thành viên</p>
-          <p v-if="fl.isPublic && shareInfoMap[fl.id]" class="text-xs text-blue-600 mt-1 flex items-center gap-1">
-            <Icon name="ph:user-circle" class="text-sm" />
-            Chia sẻ bởi <strong>{{ shareInfoMap[fl.id].userName }}</strong>
-            <span class="text-blue-400">&middot; {{ timeAgo(shareInfoMap[fl.id].createdAt) }}</span>
-          </p>
-        </div>
-        <div class="flex items-center gap-2 ml-4">
-          <button
-            v-if="canEdit"
-            @click="openShareDialog(fl)"
-            class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            :class="fl.isPublic ? 'text-green-600' : 'text-gray-500'"
-            title="Chia sẻ"
-          >
-            <Icon name="ph:share-network" />
-          </button>
-          <NuxtLink :to="`/tree/${fl.id}`" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500" title="Xem cây">
-            <Icon name="ph:tree-structure" />
-          </NuxtLink>
-          <button v-if="canEdit" @click="editFamilyLine(fl)" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500" title="Sửa">
-            <Icon name="ph:pencil-simple" />
-          </button>
-          <button v-if="isAdmin" @click="confirmDelete(fl)" class="p-2 rounded-lg hover:bg-red-50 text-red-500" title="Xóa">
-            <Icon name="ph:trash" />
-          </button>
+
+          <!-- Actions -->
+          <div class="grid grid-cols-2 min-[400px]:grid-cols-4 sm:flex sm:flex-col sm:justify-center gap-1 p-3 sm:p-2 border-t border-gray-50 sm:border-0 sm:border-l">
+            <button
+              v-if="canEdit"
+              @click="openShareDialog(fl)"
+              class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-lg text-xs font-medium transition-colors"
+              :class="fl.isPublic ? 'text-green-600 bg-green-50 hover:bg-green-100' : 'text-gray-500 bg-gray-50 hover:bg-gray-100 sm:bg-transparent'"
+              title="Chia sẻ"
+            >
+              <Icon name="ph:share-network" class="text-base shrink-0" />
+              <span class="sm:hidden">Chia sẻ</span>
+            </button>
+            <NuxtLink
+              :to="`/tree/${fl.id}`"
+              class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-lg text-xs font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 sm:bg-transparent sm:hover:bg-primary-50 transition-colors"
+              title="Xem cây"
+            >
+              <Icon name="ph:tree-structure" class="text-base shrink-0" />
+              <span class="sm:hidden">Xem cây</span>
+            </NuxtLink>
+            <button
+              v-if="canEdit"
+              @click="editFamilyLine(fl)"
+              class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-lg text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 sm:bg-transparent transition-colors"
+              title="Sửa"
+            >
+              <Icon name="ph:pencil-simple" class="text-base shrink-0" />
+              <span class="sm:hidden">Sửa</span>
+            </button>
+            <button
+              v-if="isAdmin"
+              @click="confirmDelete(fl)"
+              class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-lg text-xs font-medium text-red-500 bg-red-50 hover:bg-red-100 sm:bg-transparent transition-colors"
+              title="Xóa"
+            >
+              <Icon name="ph:trash" class="text-base shrink-0" />
+              <span class="sm:hidden">Xóa</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -109,6 +149,11 @@
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 
 const { canEdit, isAdmin } = useAuth()
+
+const accentColors = [
+  'bg-primary-500', 'bg-blue-500', 'bg-emerald-500',
+  'bg-violet-500', 'bg-amber-500', 'bg-rose-500',
+]
 const nuxtApp = useNuxtApp()
 const { data: familyLines, pending, refresh } = useLazyFetch<any[]>('/api/family-lines', {
   getCachedData: (key) => nuxtApp.payload.data[key] as any,

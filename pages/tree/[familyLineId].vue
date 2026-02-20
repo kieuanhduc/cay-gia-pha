@@ -1,56 +1,58 @@
 <template>
   <div class="flex flex-col" style="height:100dvh;height:100vh">
     <!-- Header bar -->
-    <div class="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 shrink-0">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-          <NuxtLink to="/" class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 text-gray-500 shrink-0">
-            <Icon name="ph:arrow-left-bold" />
-          </NuxtLink>
-          <div class="min-w-0">
-            <h1 class="text-sm sm:text-lg font-bold text-gray-900 truncate">{{ treeData?.familyLine?.name || 'Cây Gia Phả' }}</h1>
-            <p class="text-xs text-gray-500">{{ treeData?.totalMembers || 0 }} thành viên</p>
+    <div class="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3 shrink-0">
+      <!-- Dòng 1: Title & Member count -->
+      <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+        <NuxtLink to="/" class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 text-gray-500 shrink-0">
+          <Icon name="ph:arrow-left-bold" />
+        </NuxtLink>
+        <div class="min-w-0">
+          <h1 class="text-sm sm:text-lg font-bold text-gray-900 truncate">{{ treeData?.familyLine?.name || 'Cây Gia Phả' }}</h1>
+          <p class="text-xs text-gray-500">{{ treeData?.totalMembers || 0 }} thành viên</p>
+        </div>
+      </div>
+
+      <!-- Dòng 2: Search & Controls -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Search toggle (mobile < 768px) -->
+        <button @click="showMobileSearch = !showMobileSearch" class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 text-gray-500 md:hidden shrink-0">
+          <Icon name="ph:magnifying-glass" />
+        </button>
+
+        <!-- Search (desktop >= 768px) -->
+        <div class="relative hidden md:block flex-1 max-w-[240px] lg:max-w-xs">
+          <input
+            v-model="searchQuery"
+            class="input-field pl-8 py-1.5 text-sm w-full"
+            placeholder="Tìm thành viên..."
+            @input="onSearch"
+            @keydown.enter="selectSearchResult"
+          />
+          <Icon name="ph:magnifying-glass" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+
+          <!-- Search results dropdown -->
+          <div
+            v-if="searchResults.length > 0 && searchQuery.length > 0"
+            class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
+          >
+            <button
+              v-for="(result, i) in searchResults"
+              :key="result.id"
+              class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 transition-colors flex items-center gap-2"
+              :class="i === selectedSearchIndex ? 'bg-primary-50' : ''"
+              @click="goToMember(result.id)"
+            >
+              <span :class="result.gender === 'male' ? 'text-blue-500' : 'text-pink-500'" class="text-xs">
+                {{ result.gender === 'male' ? '♂' : '♀' }}
+              </span>
+              <span>{{ result.fullName }}</span>
+              <span class="text-gray-400 text-xs ml-auto">Đời {{ result.generation }}</span>
+            </button>
           </div>
         </div>
 
-        <div class="flex items-center gap-1 sm:gap-3 shrink-0">
-          <!-- Search toggle (mobile) -->
-          <button @click="showMobileSearch = !showMobileSearch" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 sm:hidden">
-            <Icon name="ph:magnifying-glass" />
-          </button>
-
-          <!-- Search (desktop) -->
-          <div class="relative hidden sm:block">
-            <input
-              v-model="searchQuery"
-              class="input-field pl-8 py-1.5 text-sm w-48"
-              placeholder="Tìm thành viên..."
-              @input="onSearch"
-              @keydown.enter="selectSearchResult"
-            />
-            <Icon name="ph:magnifying-glass" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-
-            <!-- Search results dropdown -->
-            <div
-              v-if="searchResults.length > 0 && searchQuery.length > 0"
-              class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
-            >
-              <button
-                v-for="(result, i) in searchResults"
-                :key="result.id"
-                class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 transition-colors flex items-center gap-2"
-                :class="i === selectedSearchIndex ? 'bg-primary-50' : ''"
-                @click="goToMember(result.id)"
-              >
-                <span :class="result.gender === 'male' ? 'text-blue-500' : 'text-pink-500'" class="text-xs">
-                  {{ result.gender === 'male' ? '♂' : '♀' }}
-                </span>
-                <span>{{ result.fullName }}</span>
-                <span class="text-gray-400 text-xs ml-auto">Đời {{ result.generation }}</span>
-              </button>
-            </div>
-          </div>
-
+        <div class="ml-auto">
           <TreeControls
             :direction="direction"
             :exporting="exporting"

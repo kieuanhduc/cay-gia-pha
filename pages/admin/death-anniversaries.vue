@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-gray-900 mb-6">
+    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
       <Icon name="ph:flower" class="text-primary-600 mr-2" />
       Ngày giỗ
     </h1>
@@ -8,14 +8,14 @@
     <!-- Filters -->
     <div class="card mb-6">
       <div class="flex flex-wrap gap-4 items-end">
-        <div class="flex-1 min-w-[180px]">
+        <div class="flex-1 min-w-0 w-full sm:w-auto">
           <label class="block text-sm font-medium text-gray-700 mb-1">Dòng họ</label>
-          <select v-model="filterFamilyLine" class="input-field" @change="loadData">
+          <select v-model="filterFamilyLine" class="input-field w-full" @change="loadData">
             <option value="">Tất cả</option>
             <option v-for="fl in familyLines" :key="fl.id" :value="fl.id">{{ fl.name }}</option>
           </select>
         </div>
-        <div class="min-w-[150px]">
+        <div class="min-w-0 w-full sm:w-auto">
           <label class="block text-sm font-medium text-gray-700 mb-1">Tháng âm lịch</label>
           <select v-model="filterMonth" class="input-field" @change="loadData">
             <option value="">Tất cả</option>

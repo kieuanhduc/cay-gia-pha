@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Quản lý tài khoản</h1>
-      <button @click="openCreateForm" class="btn-primary inline-flex items-center gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Quản lý tài khoản</h1>
+      <button @click="openCreateForm" class="btn-primary inline-flex items-center gap-2 shrink-0">
         <Icon name="ph:plus-bold" />
         Thêm tài khoản
       </button>

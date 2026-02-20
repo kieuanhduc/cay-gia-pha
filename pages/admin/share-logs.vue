@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-gray-900 mb-6">
+    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
       <Icon name="ph:eye-bold" class="text-primary-600 mr-2" />
       Lịch sử xem chia sẻ
     </h1>
@@ -8,7 +8,7 @@
     <!-- Filters -->
     <div class="card mb-6">
       <div class="flex flex-wrap gap-4 items-end">
-        <div class="flex-1 min-w-[180px]">
+        <div class="flex-1 min-w-0 w-full sm:w-auto">
           <label class="block text-sm font-medium text-gray-700 mb-1">Dòng họ</label>
           <select v-model="filterFamilyLine" class="input-field" @change="loadData(1)">
             <option value="">Tất cả</option>

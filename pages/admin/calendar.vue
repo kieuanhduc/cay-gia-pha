@@ -15,7 +15,7 @@
             <option v-for="fl in familyLines" :key="fl.id" :value="fl.id">{{ fl.name }}</option>
           </select>
         </div>
-        <div class="text-sm text-gray-500">
+        <div class="text-sm text-gray-500 mb-2">
           <Icon name="ph:moon-bold" class="text-amber-500 mr-1" />
           Ngày hiển thị theo dương lịch · Ngày giỗ theo âm lịch
         </div>

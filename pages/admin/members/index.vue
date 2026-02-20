@@ -1,18 +1,18 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-gray-900">Quản lý thành viên</h1>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div class="flex items-center gap-3 min-w-0">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Quản lý thành viên</h1>
         <button
           v-if="canEdit && selectedIds.length > 0"
           @click="confirmBulkDelete"
-          class="inline-flex items-center gap-1.5 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+          class="inline-flex items-center gap-1.5 bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium shrink-0"
         >
           <Icon name="ph:trash-bold" />
-          Xóa {{ selectedIds.length }} mục
+          Xóa {{ selectedIds.length }}
         </button>
       </div>
-      <NuxtLink v-if="canEdit" to="/admin/members/create" class="btn-primary inline-flex items-center gap-2">
+      <NuxtLink v-if="canEdit" to="/admin/members/create" class="btn-primary inline-flex items-center gap-2 shrink-0">
         <Icon name="ph:user-plus-bold" />
         Thêm thành viên
       </NuxtLink>
@@ -27,7 +27,7 @@
         </select>
         <input
           v-model="filters.search"
-          class="input-field w-auto flex-1 min-w-[200px]"
+          class="input-field flex-1 min-w-0 w-full sm:w-auto"
           placeholder="Tìm theo tên..."
           @input="debouncedSearch"
         />
