@@ -113,7 +113,7 @@ async function renderTree() {
 
   const isVertical = props.direction === 'vertical'
   const spacing: [number, number] = isMobile
-    ? (isVertical ? [170, 200] : [160, 220])
+    ? (isVertical ? [175, 210] : [170, 230])
     : (isVertical ? [220, 240] : [200, 280])
 
   const treeLayout = d3.tree()
@@ -159,9 +159,9 @@ async function renderTree() {
   const foW = isMobile ? 160 : 200
   const fo = nodeGroups.append('foreignObject')
     .attr('width', foW)
-    .attr('height', 180)
+    .attr('height', isMobile ? 160 : 200)
     .attr('x', -foW / 2)
-    .attr('y', -50)
+    .attr('y', -55)
     .attr('overflow', 'visible')
 
   fo.each(function (this: any, d: any) {

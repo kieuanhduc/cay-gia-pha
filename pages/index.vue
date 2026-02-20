@@ -31,14 +31,76 @@
           </p>
 
           <div class="flex flex-wrap gap-4 justify-center">
+            <!-- Single family line: direct link -->
             <NuxtLink
-              v-if="isLoggedIn && familyLines?.length"
+              v-if="isLoggedIn && familyLines?.length === 1"
               :to="`/tree/${familyLines[0].id}`"
               class="inline-flex items-center gap-2 bg-white text-primary-900 px-7 py-3.5 rounded-xl font-semibold hover:bg-primary-50 transition-all shadow-lg shadow-black/10 hover:shadow-xl hover:-translate-y-0.5"
             >
               <Icon name="ph:tree-structure-bold" class="text-lg" />
               Xem gia phả
             </NuxtLink>
+
+            <!-- Multiple family lines: dropdown -->
+            <div v-else-if="isLoggedIn && familyLines?.length > 1" class="relative">
+              <button
+                @click="showFamilyPicker = !showFamilyPicker"
+                class="inline-flex items-center gap-2 bg-white text-primary-900 px-7 py-3.5 rounded-xl font-semibold hover:bg-primary-50 transition-all shadow-lg shadow-black/10 hover:shadow-xl hover:-translate-y-0.5"
+              >
+                <Icon name="ph:tree-structure-bold" class="text-lg" />
+                Xem gia phả
+                <Icon
+                  name="ph:caret-down-bold"
+                  class="text-sm transition-transform duration-200"
+                  :class="showFamilyPicker ? 'rotate-180' : ''"
+                />
+              </button>
+
+              <Transition
+                enter-active-class="transition duration-150 ease-out"
+                enter-from-class="opacity-0 scale-95 -translate-y-2"
+                enter-to-class="opacity-100 scale-100 translate-y-0"
+                leave-active-class="transition duration-100 ease-in"
+                leave-from-class="opacity-100 scale-100 translate-y-0"
+                leave-to-class="opacity-0 scale-95 -translate-y-2"
+              >
+                <div
+                  v-if="showFamilyPicker"
+                  class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50"
+                >
+                  <div class="px-4 py-2.5 border-b border-gray-100 bg-gray-50">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Chọn dòng họ</p>
+                  </div>
+                  <div class="max-h-72 overflow-y-auto py-1">
+                    <NuxtLink
+                      v-for="(fl, i) in familyLines"
+                      :key="fl.id"
+                      :to="`/tree/${fl.id}`"
+                      class="flex items-center gap-3 px-4 py-3 hover:bg-primary-50 transition-colors group"
+                      @click="showFamilyPicker = false"
+                    >
+                      <div
+                        class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                        :class="iconBgColors[i % iconBgColors.length]"
+                      >
+                        <Icon name="ph:tree-structure-bold" class="text-sm" :class="iconTextColors[i % iconTextColors.length]" />
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <p class="font-semibold text-gray-900 text-sm truncate group-hover:text-primary-700 transition-colors">{{ fl.name }}</p>
+                        <p v-if="fl.originPlace" class="text-xs text-gray-400 truncate">{{ fl.originPlace }}</p>
+                        <p v-else class="text-xs text-gray-400">{{ fl.memberCount }} thành viên</p>
+                      </div>
+                      <Icon name="ph:arrow-right-bold" class="text-gray-300 group-hover:text-primary-500 text-sm shrink-0 transition-colors" />
+                    </NuxtLink>
+                  </div>
+                </div>
+              </Transition>
+
+              <!-- Click outside to close -->
+              <Teleport to="body">
+                <div v-if="showFamilyPicker" class="fixed inset-0 z-40" @click="showFamilyPicker = false" />
+              </Teleport>
+            </div>
             <NuxtLink
               v-if="isLoggedIn"
               to="/admin"
@@ -319,6 +381,8 @@
 
 <script setup lang="ts">
 const { isLoggedIn } = useAuth()
+
+const showFamilyPicker = ref(false)
 
 // Chỉ fetch family lines khi đã login — lazy để không block navigation, cache để tránh refetch
 const nuxtApp = useNuxtApp()

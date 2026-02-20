@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen flex flex-col">
+  <div class="flex flex-col" style="height:100dvh;height:100vh">
     <!-- Header bar -->
     <div class="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 shrink-0">
       <div class="flex items-center justify-between">
@@ -142,6 +142,28 @@
       class="fixed inset-0 z-40"
       @click="selectedMemberId = null"
     />
+
+    <!-- Export loading overlay -->
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="exporting" class="fixed inset-0 z-[200] bg-black/60 flex items-center justify-center">
+        <div class="bg-white rounded-2xl px-8 py-6 flex flex-col items-center gap-4 shadow-2xl mx-4">
+          <div class="relative">
+            <Icon name="ph:spinner" class="text-5xl text-primary-500 animate-spin" />
+          </div>
+          <div class="text-center">
+            <p class="text-gray-800 font-semibold text-base">Đang xuất gia phả...</p>
+            <p class="text-gray-400 text-sm mt-1">Vui lòng không tắt trang này</p>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <!-- Export dialog -->
     <ExportDialog

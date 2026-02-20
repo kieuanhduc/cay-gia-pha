@@ -1,6 +1,6 @@
 <template>
-  <div v-if="user" class="min-h-screen flex flex-col bg-gray-50">
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+  <div v-if="user" class="flex flex-col bg-gray-50" style="height:100dvh;height:100vh">
+    <header class="bg-white border-b border-gray-200 shrink-0 z-50">
       <div class="flex items-center justify-between px-4 h-14">
         <div class="flex items-center gap-3">
           <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden p-1.5 rounded-lg hover:bg-gray-100">
@@ -29,7 +29,7 @@
       </div>
     </header>
 
-    <div class="flex flex-1">
+    <div class="flex flex-1 overflow-hidden">
       <!-- Sidebar overlay for mobile -->
       <div
         v-if="sidebarOpen"
@@ -40,7 +40,7 @@
       <!-- Sidebar -->
       <aside
         :class="[
-          'fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform lg:transform-none lg:translate-x-0 pt-14 lg:pt-0',
+          'fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform lg:transform-none lg:translate-x-0 pt-14 lg:pt-0 h-full overflow-y-auto lg:shrink-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         ]"
       >
@@ -60,7 +60,7 @@
       </aside>
 
       <!-- Content -->
-      <main class="flex-1 p-4 lg:p-6 min-w-0">
+      <main class="flex-1 overflow-y-auto p-4 lg:p-6 min-w-0">
         <slot />
       </main>
     </div>
