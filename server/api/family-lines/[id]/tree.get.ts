@@ -8,10 +8,28 @@ interface TreeNode {
   birthDate: string | null
   deathDate: string | null
   isAlive: boolean
+  birthPlace: string | null
+  bio: string | null
+  deathAnniversaryLunar: string | null
+  deathAnniversaryNote: string | null
   avatarUrl: string | null
   generation: number
   birthOrder: number
-  spouses: { id: number; fullName: string; avatarUrl: string | null; gender: string; birthDate: string | null; deathDate: string | null; isAlive: boolean }[]
+  fatherName: string | null
+  motherName: string | null
+  childrenCount: number
+  spouses: {
+    id: number
+    fullName: string
+    avatarUrl: string | null
+    gender: string
+    birthDate: string | null
+    deathDate: string | null
+    isAlive: boolean
+    bio: string | null
+    birthPlace: string | null
+    marriedDate: string | null
+  }[]
   children: TreeNode[]
 }
 
@@ -35,14 +53,14 @@ export default defineEventHandler(async (event) => {
       spousesAsA: {
         include: {
           memberB: {
-            select: { id: true, fullName: true, avatarUrl: true, gender: true, birthDate: true, deathDate: true, isAlive: true },
+            select: { id: true, fullName: true, avatarUrl: true, gender: true, birthDate: true, deathDate: true, isAlive: true, bio: true, birthPlace: true },
           },
         },
       },
       spousesAsB: {
         include: {
           memberA: {
-            select: { id: true, fullName: true, avatarUrl: true, gender: true, birthDate: true, deathDate: true, isAlive: true },
+            select: { id: true, fullName: true, avatarUrl: true, gender: true, birthDate: true, deathDate: true, isAlive: true, bio: true, birthPlace: true },
           },
         },
       },
@@ -50,7 +68,10 @@ export default defineEventHandler(async (event) => {
     orderBy: [{ generation: 'asc' }, { birthOrder: 'asc' }],
   })
 
-  // Pre-build children map for O(1) lookup instead of O(n) filter per node
+  // O(1) lookup maps
+  const memberMap = new Map<number, typeof members[0]>()
+  for (const m of members) memberMap.set(m.id, m)
+
   const childrenMap = new Map<number, typeof members>()
   for (const m of members) {
     if (m.fatherId) {
@@ -61,14 +82,40 @@ export default defineEventHandler(async (event) => {
 
   // Build tree recursively
   function buildNode(member: typeof members[0]): TreeNode {
-    const children = (childrenMap.get(member.id) ?? [])
+    const childList = (childrenMap.get(member.id) ?? [])
       .sort((a, b) => a.birthOrder - b.birthOrder)
-      .map((child) => buildNode(child))
+
+    const children = childList.map((child) => buildNode(child))
 
     const spouses = [
-      ...member.spousesAsA.map((s) => s.memberB),
-      ...member.spousesAsB.map((s) => s.memberA),
+      ...member.spousesAsA.map((s) => ({
+        id: s.memberB.id,
+        fullName: s.memberB.fullName,
+        avatarUrl: s.memberB.avatarUrl,
+        gender: s.memberB.gender,
+        birthDate: s.memberB.birthDate?.toISOString() || null,
+        deathDate: s.memberB.deathDate?.toISOString() || null,
+        isAlive: s.memberB.isAlive,
+        bio: s.memberB.bio || null,
+        birthPlace: s.memberB.birthPlace || null,
+        marriedDate: s.marriedDate?.toISOString() || null,
+      })),
+      ...member.spousesAsB.map((s) => ({
+        id: s.memberA.id,
+        fullName: s.memberA.fullName,
+        avatarUrl: s.memberA.avatarUrl,
+        gender: s.memberA.gender,
+        birthDate: s.memberA.birthDate?.toISOString() || null,
+        deathDate: s.memberA.deathDate?.toISOString() || null,
+        isAlive: s.memberA.isAlive,
+        bio: s.memberA.bio || null,
+        birthPlace: s.memberA.birthPlace || null,
+        marriedDate: s.marriedDate?.toISOString() || null,
+      })),
     ]
+
+    const father = member.fatherId ? memberMap.get(member.fatherId) : null
+    const mother = member.motherId ? memberMap.get(member.motherId) : null
 
     return {
       id: member.id,
@@ -77,10 +124,17 @@ export default defineEventHandler(async (event) => {
       birthDate: member.birthDate?.toISOString() || null,
       deathDate: member.deathDate?.toISOString() || null,
       isAlive: member.isAlive,
+      birthPlace: member.birthPlace || null,
+      bio: member.bio || null,
+      deathAnniversaryLunar: member.deathAnniversaryLunar || null,
+      deathAnniversaryNote: member.deathAnniversaryNote || null,
       avatarUrl: member.avatarUrl,
       generation: member.generation,
       birthOrder: member.birthOrder,
-      spouses: spouses as any,
+      fatherName: father?.fullName || null,
+      motherName: mother?.fullName || null,
+      childrenCount: childList.length,
+      spouses,
       children,
     }
   }

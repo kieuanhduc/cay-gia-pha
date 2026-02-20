@@ -7,9 +7,25 @@ interface TreeNode {
   birthDate: string | null
   deathDate: string | null
   isAlive: boolean
+  birthPlace: string | null
+  bio: string | null
+  deathAnniversaryLunar: string | null
+  deathAnniversaryNote: string | null
   avatarUrl: string | null
   generation: number
-  spouses?: { fullName: string }[]
+  fatherName: string | null
+  motherName: string | null
+  childrenCount: number
+  spouses?: {
+    fullName: string
+    gender?: string
+    birthDate?: string | null
+    deathDate?: string | null
+    isAlive?: boolean
+    bio?: string | null
+    birthPlace?: string | null
+    marriedDate?: string | null
+  }[]
   children?: TreeNode[]
 }
 
@@ -56,6 +72,15 @@ export function useTreeExport() {
     return `${birth} - nay`
   }
 
+  function formatDate(dateStr: string | null): string {
+    if (!dateStr) return '?'
+    const d = new Date(dateStr)
+    const dd = d.getDate().toString().padStart(2, '0')
+    const mm = (d.getMonth() + 1).toString().padStart(2, '0')
+    const yyyy = d.getFullYear()
+    return `${dd}/${mm}/${yyyy}`
+  }
+
   /**
    * Compute tree layout using simple algorithm (like d3.tree)
    * Returns flat array of positioned nodes + links
@@ -69,10 +94,10 @@ export function useTreeExport() {
     }
 
     // Use a simple Reingold-Tilford style layout
-    const nodeW = 200
-    const nodeH = 140
-    const hGap = 40  // horizontal gap between siblings
-    const vGap = 60  // vertical gap between generations
+    const nodeW = 224
+    const nodeH = 380
+    const hGap = 60  // horizontal gap between siblings
+    const vGap = 100  // vertical gap between generations
 
     // First pass: assign widths bottom-up
     function assignWidth(node: TreeNode): number {
@@ -126,40 +151,124 @@ export function useTreeExport() {
     return d.innerHTML
   }
 
+  function row(label: string, value: string, color = '#374151'): string {
+    return `<div style="display:flex;gap:4px;margin-top:2px;font-size:9px;line-height:1.4;">
+      <span style="color:#9ca3af;white-space:nowrap;min-width:52px;">${label}</span>
+      <span style="color:${color};font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${value}</span>
+    </div>`
+  }
+
+  function divLine(): string {
+    return `<div style="border-top:1px solid #e5e7eb;margin:5px 0;"></div>`
+  }
+
   /** Render a node card as HTML string */
   function renderNodeCard(data: TreeNode): string {
     if (data.id === 0) return ''
 
-    const years = formatYears(data.birthDate, data.deathDate, data.isAlive)
     const isMale = data.gender === 'male'
     const borderColor = isMale ? '#93c5fd' : '#f9a8d4'
-    const bgColor = data.isAlive ? '#ffffff' : '#f9fafb'
+    const headerBg = isMale ? 'linear-gradient(135deg,#eff6ff,#dbeafe)' : 'linear-gradient(135deg,#fdf2f8,#fce7f3)'
+    const genderText = isMale ? 'Nam' : 'Nữ'
+    const genderColor = isMale ? '#2563eb' : '#db2777'
     const genderSymbol = isMale ? '♂' : '♀'
-    const genderColor = isMale ? '#60a5fa' : '#f472b6'
-    const spouseName = data.spouses?.[0]?.fullName
+    const spouses = data.spouses ?? []
+
+    // --- Header: avatar + name + gender/gen badge ---
+    const avatarHtml = data.avatarUrl
+      ? `<img src="${data.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>`
+      : `<span style="font-size:20px;color:${genderColor};">${genderSymbol}</span>`
+
+    const header = `
+      <div style="background:${headerBg};border-radius:8px 8px 0 0;padding:8px 8px 6px;display:flex;align-items:center;gap:8px;">
+        <div style="width:44px;height:44px;border-radius:50%;border:2px solid ${borderColor};background:#f3f4f6;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+          ${avatarHtml}
+        </div>
+        <div style="overflow:hidden;">
+          <div style="font-weight:700;font-size:12px;color:#111827;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(data.fullName)}</div>
+          <div style="margin-top:2px;display:flex;gap:4px;align-items:center;">
+            <span style="font-size:9px;font-weight:600;color:${genderColor};background:${isMale ? '#dbeafe' : '#fce7f3'};border-radius:3px;padding:1px 4px;">${genderText}</span>
+            <span style="font-size:9px;font-weight:600;color:#b45309;background:#fef3c7;border-radius:3px;padding:1px 4px;">Đời ${data.generation}</span>
+            <span style="font-size:9px;color:${data.isAlive ? '#16a34a' : '#6b7280'};font-weight:500;">${data.isAlive ? 'Còn sống' : 'Đã mất'}</span>
+          </div>
+        </div>
+      </div>`
+
+    // --- Life info ---
+    const birthStr = formatDate(data.birthDate)
+    const deathStr = !data.isAlive ? formatDate(data.deathDate) : null
+
+    let lifeRows = row('Sinh:', birthStr)
+    if (data.birthPlace) lifeRows += row('Nơi sinh:', escapeHtml(data.birthPlace))
+    if (!data.isAlive) {
+      lifeRows += row('Mất:', deathStr ?? '?', '#4b5563')
+      if (data.deathAnniversaryLunar) {
+        const annivLabel = data.deathAnniversaryLunar + ' (ÂL)'
+        const annivNote = data.deathAnniversaryNote ? ' — ' + data.deathAnniversaryNote : ''
+        lifeRows += row('Ngày giỗ:', escapeHtml(annivLabel + annivNote), '#7c3aed')
+      }
+    }
+
+    // --- Bio của thành viên chính (ngay sau thông tin cá nhân) ---
+    const bioText = data.bio ? data.bio.slice(0, 80) + (data.bio.length > 80 ? '…' : '') : ''
+    const bioRow = bioText
+      ? `<div style="font-size:9px;color:#4b5563;line-height:1.4;font-style:italic;border-left:2px solid #d1d5db;padding-left:5px;margin-top:3px;">${escapeHtml(bioText)}</div>`
+      : ''
+
+    // --- Family relations ---
+    let familyRows = ''
+    if (data.fatherName) familyRows += row('Cha:', escapeHtml(data.fatherName), '#1d4ed8')
+    if (data.motherName) familyRows += row('Mẹ:', escapeHtml(data.motherName), '#be185d')
+
+    const spouseLabel = isMale ? 'Vợ' : 'Chồng'
+    for (const s of spouses) {
+      const sBirth = s.birthDate ? formatDate(s.birthDate) : null
+      const sDeath = s.isAlive === false ? formatDate(s.deathDate ?? null) : null
+      const sMarried = s.marriedDate ? formatDate(s.marriedDate) : null
+      const sBio = s.bio ? s.bio.slice(0, 60) + (s.bio.length > 60 ? '…' : '') : null
+
+      const spouseMetaLines: string[] = []
+      if (sBirth) spouseMetaLines.push(`Sinh: ${sBirth}`)
+      if (s.birthPlace) spouseMetaLines.push(`Nơi sinh: ${escapeHtml(s.birthPlace)}`)
+      if (sDeath) spouseMetaLines.push(`Mất: ${sDeath}`)
+      if (sMarried) spouseMetaLines.push(`Cưới: ${sMarried}`)
+
+      const spouseMetaHtml = spouseMetaLines
+        .map(line => `<div>${line}</div>`)
+        .join('')
+
+      familyRows += `
+        <div style="margin-top:3px;padding:4px 6px;background:#fef9f0;border-left:3px solid #d97706;border-radius:0 4px 4px 0;">
+          <div style="font-size:9px;color:#78350f;font-weight:700;">${escapeHtml(spouseLabel)}: ${escapeHtml(s.fullName)}</div>
+          ${spouseMetaHtml ? `<div style="font-size:8.5px;color:#92400e;margin-top:1px;line-height:1.6;">${spouseMetaHtml}</div>` : ''}
+          ${sBio ? `<div style="font-size:8.5px;color:#4b5563;margin-top:2px;font-style:italic;border-left:2px solid #fcd34d;padding-left:4px;line-height:1.4;">${escapeHtml(sBio)}</div>` : ''}
+        </div>`
+    }
+
+    const childCount = data.childrenCount ?? data.children?.length ?? 0
+    if (childCount > 0) {
+      familyRows += row('Con:', `${childCount} người`, '#065f46')
+    }
+
+    const hasFamilyRows = familyRows.length > 0
 
     return `
       <div style="
-        background:${bgColor};
+        background:#ffffff;
         border:2px solid ${borderColor};
         border-radius:10px;
-        padding:8px 6px 10px;
-        text-align:center;
-        box-shadow:0 2px 6px rgba(0,0,0,0.08);
+        box-shadow:0 2px 8px rgba(0,0,0,0.10);
         font-family:'Be Vietnam Pro',sans-serif;
-        width:184px;
+        width:220px;
         box-sizing:border-box;
+        overflow:hidden;
       ">
-        <div style="
-          width:36px;height:36px;border-radius:50%;margin:0 auto 4px;
-          background:#f3f4f6;display:flex;align-items:center;justify-content:center;
-          font-size:16px;color:${genderColor};overflow:hidden;
-          border:1.5px solid ${borderColor};
-        ">${data.avatarUrl ? `<img src="${data.avatarUrl}" style="width:100%;height:100%;object-fit:cover;"/>` : genderSymbol}</div>
-        <div style="font-weight:600;font-size:12px;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;">${escapeHtml(data.fullName)}</div>
-        <div style="font-size:10px;color:#9ca3af;margin-top:1px;">${years}</div>
-        <div style="font-size:9px;color:#b45309;font-weight:600;margin-top:1px;">Đời ${data.generation}</div>
-        ${spouseName ? `<div style="font-size:9px;color:#92400e;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">∞ ${escapeHtml(spouseName)}</div>` : ''}
+        ${header}
+        <div style="padding:6px 8px 8px;">
+          ${lifeRows}
+          ${bioRow}
+          ${hasFamilyRows ? divLine() + familyRows : ''}
+        </div>
       </div>
     `
   }
@@ -298,8 +407,8 @@ export function useTreeExport() {
       await preloadAvatars(treeDataClone)
 
       // 1. Compute tree layout from data (independent of current SVG)
-      const nodeW = 192
-      const nodeH = 130
+      const nodeW = 224
+      const nodeH = 380
       const layout = layoutTree(treeDataClone)
 
       // 2. Dimensions
