@@ -24,6 +24,7 @@
         <div v-if="isLoggedIn" class="hidden lg:flex items-center gap-3">
           <span class="text-sm text-gray-600">{{ user?.fullName }}</span>
           <NuxtLink
+            v-if="canEdit"
             to="/admin"
             class="text-sm text-primary-600 hover:text-primary-700 font-medium"
           >
@@ -76,7 +77,7 @@
           <div class="px-3 py-2 text-sm text-gray-500 font-medium">
             {{ user?.fullName }}
           </div>
-          <NuxtLink to="/admin" class="block px-3 py-2 rounded-lg text-sm font-medium text-primary-600 hover:bg-primary-50" @click="menuOpen = false">
+          <NuxtLink v-if="canEdit" to="/admin" class="block px-3 py-2 rounded-lg text-sm font-medium text-primary-600 hover:bg-primary-50" @click="menuOpen = false">
             <Icon name="ph:gear-bold" class="mr-1" />
             Quản trị
           </NuxtLink>
@@ -95,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-const { isLoggedIn, user, logout } = useAuth()
+const { isLoggedIn, user, logout, canEdit } = useAuth()
 const route = useRoute()
 const menuOpen = ref(false)
 

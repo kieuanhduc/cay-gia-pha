@@ -102,7 +102,7 @@
               </Teleport>
             </div>
             <NuxtLink
-              v-if="isLoggedIn"
+              v-if="canEdit"
               to="/admin"
               class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-7 py-3.5 rounded-xl font-semibold ring-1 ring-white/20 hover:bg-white/20 transition-all hover:-translate-y-0.5"
             >
@@ -167,7 +167,7 @@
             <Icon name="ph:users-three" class="text-gray-300 text-4xl" />
           </div>
           <p class="text-gray-500 text-lg">Chưa có dòng họ nào được tạo</p>
-          <NuxtLink to="/admin/family-lines" class="btn-primary mt-4 inline-block">
+          <NuxtLink v-if="canEdit" to="/admin/family-lines" class="btn-primary mt-4 inline-block">
             Tạo dòng họ đầu tiên
           </NuxtLink>
         </div>
@@ -380,7 +380,7 @@
 </template>
 
 <script setup lang="ts">
-const { isLoggedIn } = useAuth()
+const { isLoggedIn, canEdit } = useAuth()
 
 const showFamilyPicker = ref(false)
 
