@@ -180,7 +180,7 @@ const { data: familyLines } = useLazyFetch<any[]>('/api/family-lines', {
 
 const showForm = ref(false)
 const editingId = ref<number | null>(null)
-const form = ref({ username: '', fullName: '', password: '', role: 'editor' })
+const form = ref({ username: '', fullName: '', password: '', role: 'viewer' })
 const selectedFamilyLineIds = ref<number[]>([])
 const formError = ref('')
 const saving = ref(false)

@@ -9,6 +9,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (!isAdmin.value) {
-    return navigateTo('/', { redirectCode: 302 })
+    return navigateTo({ path: '/', query: { noAccess: 'admin' } }, { redirectCode: 302 })
   }
 })

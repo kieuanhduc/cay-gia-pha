@@ -1,5 +1,33 @@
 <template>
   <div class="overflow-hidden">
+    <!-- No-access popup -->
+    <Transition name="fade">
+      <div
+        v-if="showNoAccessBanner"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+        @click.self="showNoAccessBanner = false"
+      >
+        <Transition name="pop">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center">
+            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="ph:lock-key-bold" class="text-amber-500 text-3xl" />
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Chưa có quyền truy cập</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-6">
+              Tài khoản của bạn chưa được cấp quyền xem gia phả.<br />
+              Nếu bạn là thành viên trong dòng họ, hãy liên hệ quản trị viên để được cấp quyền.
+            </p>
+            <button
+              @click="showNoAccessBanner = false"
+              class="btn-primary w-full"
+            >
+              Đã hiểu
+            </button>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
     <!-- Hero -->
     <section class="relative bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 text-white overflow-hidden">
       <!-- Decorative elements -->
@@ -381,15 +409,23 @@
 
 <script setup lang="ts">
 const { isLoggedIn, canEdit } = useAuth()
+const route = useRoute()
+const router = useRouter()
+
+const showNoAccessBanner = ref(false)
+
+onMounted(() => {
+  if (route.query.noAccess === 'admin') {
+    showNoAccessBanner.value = true
+    router.replace({ path: '/', query: {} })
+  }
+})
 
 const showFamilyPicker = ref(false)
 
-// Chỉ fetch family lines khi đã login — lazy để không block navigation, cache để tránh refetch
-const nuxtApp = useNuxtApp()
+// Chỉ fetch family lines khi đã login, client-side only để cookie được gửi đúng
 const { data: familyLines, pending } = isLoggedIn.value
-  ? useLazyFetch<any[]>('/api/family-lines', {
-      getCachedData: (key) => nuxtApp.payload.data[key] as any,
-    })
+  ? useLazyFetch<any[]>('/api/family-lines', { server: false })
   : { data: ref([]), pending: ref(false) }
 
 // Lazy load để không block SSR
@@ -504,3 +540,26 @@ const features = [
   },
 ]
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.pop-enter-active {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.pop-leave-active {
+  transition: all 0.2s ease;
+}
+.pop-enter-from,
+.pop-leave-to {
+  opacity: 0;
+  transform: scale(0.85);
+}
+</style>

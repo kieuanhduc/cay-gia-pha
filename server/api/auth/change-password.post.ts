@@ -1,10 +1,10 @@
 import prisma from '~/server/utils/prisma'
-import { verifyPwd, hashPwd } from '~/server/utils/auth'
+import { hashPwd } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
-  if (!body.username || !body.oldPassword || !body.newPassword) {
+  if (!body.username || !body.newPassword) {
     throw createError({ statusCode: 400, message: 'Vui lòng điền đầy đủ thông tin' })
   }
 
@@ -14,13 +14,8 @@ export default defineEventHandler(async (event) => {
 
   const user = await prisma.user.findUnique({ where: { username: body.username } })
 
-  if (!user || !user.password) {
-    throw createError({ statusCode: 401, message: 'Tên đăng nhập hoặc mật khẩu cũ không đúng' })
-  }
-
-  const valid = await verifyPwd(body.oldPassword, user.password)
-  if (!valid) {
-    throw createError({ statusCode: 401, message: 'Tên đăng nhập hoặc mật khẩu cũ không đúng' })
+  if (!user) {
+    throw createError({ statusCode: 404, message: 'Tên đăng nhập không tồn tại' })
   }
 
   const hashed = await hashPwd(body.newPassword)

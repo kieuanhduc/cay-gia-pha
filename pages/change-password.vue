@@ -6,7 +6,7 @@
           <Icon name="ph:lock-key-bold" class="text-primary-600 text-3xl" />
         </div>
         <h1 class="text-2xl font-bold text-gray-900">Đổi mật khẩu</h1>
-        <p class="text-gray-500 mt-1">Nhập thông tin để xác minh và đặt mật khẩu mới</p>
+        <p class="text-gray-500 mt-1">Nhập tên đăng nhập và mật khẩu mới của bạn</p>
       </div>
 
       <!-- Success -->
@@ -37,26 +37,6 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu hiện tại *</label>
-          <div class="relative">
-            <input
-              v-model="form.oldPassword"
-              :type="showOld ? 'text' : 'password'"
-              class="input-field pr-10"
-              placeholder="Nhập mật khẩu hiện tại"
-              required
-            />
-            <button
-              type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              @click="showOld = !showOld"
-            >
-              <Icon :name="showOld ? 'ph:eye-slash' : 'ph:eye'" />
-            </button>
-          </div>
-        </div>
-
-        <div class="border-t border-gray-100 pt-4">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu mới *</label>
             <div class="relative">
@@ -138,14 +118,12 @@ definePageMeta({ layout: false })
 
 const form = ref({
   username: '',
-  oldPassword: '',
   newPassword: '',
   confirmPassword: '',
 })
 const loading = ref(false)
 const error = ref('')
 const success = ref(false)
-const showOld = ref(false)
 const showNew = ref(false)
 const showConfirm = ref(false)
 
@@ -157,18 +135,12 @@ async function handleSubmit() {
     return
   }
 
-  if (form.value.oldPassword === form.value.newPassword) {
-    error.value = 'Mật khẩu mới phải khác mật khẩu hiện tại'
-    return
-  }
-
   loading.value = true
   try {
     await $fetch('/api/auth/change-password', {
       method: 'POST',
       body: {
         username: form.value.username,
-        oldPassword: form.value.oldPassword,
         newPassword: form.value.newPassword,
       },
     })
