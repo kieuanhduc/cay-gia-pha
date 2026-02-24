@@ -27,6 +27,7 @@ export const useAuth = () => {
     await $fetch('/api/auth/logout', { method: 'POST' })
     user.value = null
     authInitialized.value = false
+    sessionStorage.removeItem('noAccessBanner')
     navigateTo('/')
   }
 

@@ -1,11 +1,34 @@
 <template>
   <div class="overflow-hidden">
+    <!-- No-access banner -->
+    <Transition name="slide-down">
+      <div
+        v-if="showNoAccessBanner"
+        class="relative bg-amber-50 border-b border-amber-200"
+      >
+        <div class="max-w-7xl mx-auto px-4 py-3.5 flex items-start gap-3 sm:items-center">
+          <Icon name="ph:lock-bold" class="text-amber-500 text-xl flex-shrink-0 mt-0.5 sm:mt-0" />
+          <p class="text-sm text-amber-800 flex-1">
+            <span class="font-semibold">Tài khoản của bạn chưa được cấp quyền.</span>
+            Nếu bạn là thành viên trong dòng họ, hãy liên hệ quản trị viên để được cấp quyền truy cập gia phả.
+          </p>
+          <button
+            @click="showNoAccessBanner = false; sessionStorage.removeItem('noAccessBanner')"
+            class="flex-shrink-0 p-1 rounded-md hover:bg-amber-100 text-amber-500 hover:text-amber-700 transition-colors"
+            aria-label="Đóng"
+          >
+            <Icon name="ph:x-bold" class="text-base" />
+          </button>
+        </div>
+      </div>
+    </Transition>
+
     <!-- No-access popup -->
     <Transition name="fade">
       <div
-        v-if="showNoAccessBanner"
+        v-if="showNoAccessPopup"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-        @click.self="showNoAccessBanner = false"
+        @click.self="showNoAccessPopup = false"
       >
         <Transition name="pop">
           <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center">
@@ -18,7 +41,7 @@
               Nếu bạn là thành viên trong dòng họ, hãy liên hệ quản trị viên để được cấp quyền.
             </p>
             <button
-              @click="showNoAccessBanner = false"
+              @click="showNoAccessPopup = false"
               class="btn-primary w-full"
             >
               Đã hiểu
@@ -413,11 +436,23 @@ const route = useRoute()
 const router = useRouter()
 
 const showNoAccessBanner = ref(false)
+const showNoAccessPopup = ref(false)
 
 onMounted(() => {
   if (route.query.noAccess === 'admin') {
-    showNoAccessBanner.value = true
+    sessionStorage.setItem('noAccessBanner', '1')
+    showNoAccessPopup.value = true
     router.replace({ path: '/', query: {} })
+  }
+  if (sessionStorage.getItem('noAccessBanner')) {
+    showNoAccessBanner.value = true
+  }
+})
+
+watch(isLoggedIn, (val) => {
+  if (!val) {
+    showNoAccessBanner.value = false
+    showNoAccessPopup.value = false
   }
 })
 
@@ -542,6 +577,16 @@ const features = [
 </script>
 
 <style scoped>
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.25s ease;
