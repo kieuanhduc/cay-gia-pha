@@ -151,15 +151,15 @@ export function useTreeExport() {
     return d.innerHTML
   }
 
-  function row(label: string, value: string, color = '#374151'): string {
+  function row(label: string, value: string, color = '#3C2A1A'): string {
     return `<div style="display:flex;gap:4px;margin-top:2px;font-size:9px;line-height:1.4;">
-      <span style="color:#9ca3af;white-space:nowrap;min-width:52px;">${label}</span>
+      <span style="color:#B8936A;white-space:nowrap;min-width:52px;">${label}</span>
       <span style="color:${color};font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${value}</span>
     </div>`
   }
 
   function divLine(): string {
-    return `<div style="border-top:1px solid #e5e7eb;margin:5px 0;"></div>`
+    return `<div style="border-top:1px solid #E8D5A8;margin:5px 0;"></div>`
   }
 
   /** Render a node card as HTML string */
@@ -167,41 +167,42 @@ export function useTreeExport() {
     if (data.id === 0) return ''
 
     const isMale = data.gender === 'male'
-    const borderColor = isMale ? '#93c5fd' : '#f9a8d4'
-    const headerBg = isMale ? 'linear-gradient(135deg,#eff6ff,#dbeafe)' : 'linear-gradient(135deg,#fdf2f8,#fce7f3)'
+    // Deep gradient headers — heritage/premium look
+    const headerBg = isMale
+      ? 'linear-gradient(135deg, #1a3a6b 0%, #2d6496 55%, #3b7fc4 100%)'
+      : 'linear-gradient(135deg, #6b1a30 0%, #a03350 55%, #c05670 100%)'
     const genderText = isMale ? 'Nam' : 'Nữ'
-    const genderColor = isMale ? '#2563eb' : '#db2777'
     const genderSymbol = isMale ? '♂' : '♀'
     const spouses = data.spouses ?? []
 
-    // --- Header: avatar + name + gender/gen badge ---
+    // Avatar
     const avatarHtml = data.avatarUrl
       ? `<img src="${data.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>`
-      : `<span style="font-size:20px;color:${genderColor};">${genderSymbol}</span>`
+      : `<div style="width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:rgba(255,255,255,0.55);">${genderSymbol}</div>`
 
     const header = `
-      <div style="background:${headerBg};border-radius:8px 8px 0 0;padding:8px 8px 6px;display:flex;align-items:center;gap:8px;">
-        <div style="width:44px;height:44px;border-radius:50%;border:2px solid ${borderColor};background:#f3f4f6;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+      <div style="background:${headerBg};border-radius:8px 8px 0 0;padding:9px 10px 8px;display:flex;align-items:center;gap:9px;">
+        <div style="width:48px;height:48px;border-radius:50%;border:2.5px solid rgba(212,160,23,0.85);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.1);">
           ${avatarHtml}
         </div>
-        <div style="overflow:hidden;">
-          <div style="font-weight:700;font-size:12px;color:#111827;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(data.fullName)}</div>
-          <div style="margin-top:2px;display:flex;gap:4px;align-items:center;">
-            <span style="font-size:9px;font-weight:600;color:${genderColor};background:${isMale ? '#dbeafe' : '#fce7f3'};border-radius:3px;padding:1px 4px;">${genderText}</span>
-            <span style="font-size:9px;font-weight:600;color:#b45309;background:#fef3c7;border-radius:3px;padding:1px 4px;">Đời ${data.generation}</span>
-            <span style="font-size:9px;color:${data.isAlive ? '#16a34a' : '#6b7280'};font-weight:500;">${data.isAlive ? 'Còn sống' : 'Đã mất'}</span>
+        <div style="overflow:hidden;flex:1;">
+          <div style="font-weight:700;font-size:12.5px;color:#FFFFFF;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px rgba(0,0,0,0.35);">${escapeHtml(data.fullName)}</div>
+          <div style="margin-top:3px;display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:8px;font-weight:600;color:rgba(255,255,255,0.92);background:rgba(255,255,255,0.2);border-radius:3px;padding:1px 5px;letter-spacing:0.3px;">${genderText}</span>
+            <span style="font-size:8px;font-weight:700;color:#fbbf24;background:rgba(0,0,0,0.22);border-radius:3px;padding:1px 5px;">Đời ${data.generation}</span>
+            <span style="font-size:8px;color:${data.isAlive ? '#86efac' : 'rgba(255,255,255,0.38)'};font-weight:500;">${data.isAlive ? '● Còn sống' : '† Đã mất'}</span>
           </div>
         </div>
       </div>`
 
-    // --- Life info ---
+    // Life info
     const birthStr = formatDate(data.birthDate)
     const deathStr = !data.isAlive ? formatDate(data.deathDate) : null
 
     let lifeRows = row('Sinh:', birthStr)
     if (data.birthPlace) lifeRows += row('Nơi sinh:', escapeHtml(data.birthPlace))
     if (!data.isAlive) {
-      lifeRows += row('Mất:', deathStr ?? '?', '#4b5563')
+      lifeRows += row('Mất:', deathStr ?? '?', '#64748b')
       if (data.deathAnniversaryLunar) {
         const annivLabel = data.deathAnniversaryLunar + ' (ÂL)'
         const annivNote = data.deathAnniversaryNote ? ' — ' + data.deathAnniversaryNote : ''
@@ -209,13 +210,13 @@ export function useTreeExport() {
       }
     }
 
-    // --- Bio của thành viên chính (ngay sau thông tin cá nhân) ---
+    // Bio block
     const bioText = data.bio ? data.bio.slice(0, 80) + (data.bio.length > 80 ? '…' : '') : ''
     const bioRow = bioText
-      ? `<div style="font-size:9px;color:#4b5563;line-height:1.4;font-style:italic;border-left:2px solid #d1d5db;padding-left:5px;margin-top:3px;">${escapeHtml(bioText)}</div>`
+      ? `<div style="font-size:8.5px;color:#6B5040;line-height:1.5;font-style:italic;border-left:2px solid #D4A017;padding:2px 0 2px 5px;margin-top:3px;">${escapeHtml(bioText)}</div>`
       : ''
 
-    // --- Family relations ---
+    // Family relations
     let familyRows = ''
     if (data.fatherName) familyRows += row('Cha:', escapeHtml(data.fatherName), '#1d4ed8')
     if (data.motherName) familyRows += row('Mẹ:', escapeHtml(data.motherName), '#be185d')
@@ -227,21 +228,18 @@ export function useTreeExport() {
       const sMarried = s.marriedDate ? formatDate(s.marriedDate) : null
       const sBio = s.bio ? s.bio.slice(0, 60) + (s.bio.length > 60 ? '…' : '') : null
 
-      const spouseMetaLines: string[] = []
-      if (sBirth) spouseMetaLines.push(`Sinh: ${sBirth}`)
-      if (s.birthPlace) spouseMetaLines.push(`Nơi sinh: ${escapeHtml(s.birthPlace)}`)
-      if (sDeath) spouseMetaLines.push(`Mất: ${sDeath}`)
-      if (sMarried) spouseMetaLines.push(`Cưới: ${sMarried}`)
-
-      const spouseMetaHtml = spouseMetaLines
-        .map(line => `<div>${line}</div>`)
-        .join('')
+      const spouseMeta = [
+        sBirth ? `Sinh: ${sBirth}` : null,
+        s.birthPlace ? `Nơi sinh: ${escapeHtml(s.birthPlace)}` : null,
+        sDeath ? `Mất: ${sDeath}` : null,
+        sMarried ? `Kết hôn: ${sMarried}` : null,
+      ].filter(Boolean).join(' · ')
 
       familyRows += `
-        <div style="margin-top:3px;padding:4px 6px;background:#fef9f0;border-left:3px solid #d97706;border-radius:0 4px 4px 0;">
-          <div style="font-size:9px;color:#78350f;font-weight:700;">${escapeHtml(spouseLabel)}: ${escapeHtml(s.fullName)}</div>
-          ${spouseMetaHtml ? `<div style="font-size:8.5px;color:#92400e;margin-top:1px;line-height:1.6;">${spouseMetaHtml}</div>` : ''}
-          ${sBio ? `<div style="font-size:8.5px;color:#4b5563;margin-top:2px;font-style:italic;border-left:2px solid #fcd34d;padding-left:4px;line-height:1.4;">${escapeHtml(sBio)}</div>` : ''}
+        <div style="margin-top:4px;padding:4px 7px;background:linear-gradient(135deg,#FFF8EE,#FEF2D8);border-left:3px solid #D4A017;border-radius:0 4px 4px 0;">
+          <div style="font-size:9px;color:#78350f;font-weight:700;">${spouseLabel}: ${escapeHtml(s.fullName)}</div>
+          ${spouseMeta ? `<div style="font-size:8px;color:#92400e;margin-top:1px;line-height:1.5;">${spouseMeta}</div>` : ''}
+          ${sBio ? `<div style="font-size:8px;color:#5B4030;margin-top:2px;font-style:italic;padding-left:4px;line-height:1.4;">${escapeHtml(sBio)}</div>` : ''}
         </div>`
     }
 
@@ -254,17 +252,17 @@ export function useTreeExport() {
 
     return `
       <div style="
-        background:#ffffff;
-        border:2px solid ${borderColor};
+        background:#FFFDF7;
+        border:2px solid #C5973A;
         border-radius:10px;
-        box-shadow:0 2px 8px rgba(0,0,0,0.10);
+        box-shadow:0 4px 14px rgba(101,67,33,0.18),0 1px 4px rgba(0,0,0,0.07);
         font-family:'Be Vietnam Pro',sans-serif;
         width:220px;
         box-sizing:border-box;
         overflow:hidden;
       ">
         ${header}
-        <div style="padding:6px 8px 8px;">
+        <div style="padding:7px 9px 9px;">
           ${lifeRows}
           ${bioRow}
           ${hasFamilyRows ? divLine() + familyRows : ''}
@@ -273,12 +271,10 @@ export function useTreeExport() {
     `
   }
 
-  /** Create SVG lines connecting parent to children */
-  function renderLinks(links: { from: LayoutNode; to: LayoutNode }[], nodeW: number, nodeH: number): string {
-    const halfW = nodeW / 2
+  /** Create smooth bezier curves connecting parent to children */
+  function renderLinks(links: { from: LayoutNode; to: LayoutNode }[], _nodeW: number, nodeH: number): string {
     let paths = ''
 
-    // Group links by parent for orthogonal routing
     const byParent = new Map<LayoutNode, LayoutNode[]>()
     for (const link of links) {
       if (!byParent.has(link.from)) byParent.set(link.from, [])
@@ -288,28 +284,14 @@ export function useTreeExport() {
     for (const [parent, children] of byParent) {
       const px = parent.x
       const py = parent.y + nodeH - 10 // bottom of parent card
-      const midY = py + 30 // horizontal connector y
 
-      // Vertical line down from parent
-      paths += `<line x1="${px}" y1="${py}" x2="${px}" y2="${midY}" stroke="#c4a574" stroke-width="2"/>`
+      for (const child of children) {
+        const cx = child.x
+        const cy = child.y + 5 // top of child card
+        const cpY = py + (cy - py) * 0.48
 
-      if (children.length === 1) {
-        // Single child - straight line down
-        const cy = children[0].y + 5
-        paths += `<line x1="${px}" y1="${midY}" x2="${children[0].x}" y2="${cy}" stroke="#c4a574" stroke-width="2"/>`
-      } else {
-        // Multiple children - horizontal bar then vertical drops
-        const minX = Math.min(...children.map(c => c.x))
-        const maxX = Math.max(...children.map(c => c.x))
-
-        // Horizontal connector
-        paths += `<line x1="${minX}" y1="${midY}" x2="${maxX}" y2="${midY}" stroke="#c4a574" stroke-width="2"/>`
-
-        // Vertical drops to each child
-        for (const child of children) {
-          const cy = child.y + 5
-          paths += `<line x1="${child.x}" y1="${midY}" x2="${child.x}" y2="${cy}" stroke="#c4a574" stroke-width="2"/>`
-        }
+        // Smooth S-curve per connection — elegant heritage look
+        paths += `<path d="M${px},${py} C${px},${cpY} ${cx},${cpY} ${cx},${cy}" fill="none" stroke="#C5973A" stroke-width="2" stroke-opacity="0.82"/>`
       }
     }
 
@@ -321,30 +303,35 @@ export function useTreeExport() {
     const p = 40
 
     // Meander pattern segments
-    const mSize = 14
+    const mSize = 12
     let meander = ''
     // Top
-    for (let x = p; x < w - p - mSize; x += mSize * 2) {
-      meander += `<path d="M${x},${p} h${mSize} v${mSize} h${mSize} v${-mSize}" fill="none" stroke="#C5973A" stroke-width="1.2" opacity="0.45"/>`
+    for (let x = p + 6; x < w - p - 6 - mSize * 2; x += mSize * 2) {
+      meander += `<path d="M${x},${p} h${mSize} v${mSize} h${mSize} v${-mSize}" fill="none" stroke="#C5973A" stroke-width="1" opacity="0.42"/>`
     }
     // Bottom
-    for (let x = p; x < w - p - mSize; x += mSize * 2) {
-      meander += `<path d="M${x},${h - p} h${mSize} v${-mSize} h${mSize} v${mSize}" fill="none" stroke="#C5973A" stroke-width="1.2" opacity="0.45"/>`
+    for (let x = p + 6; x < w - p - 6 - mSize * 2; x += mSize * 2) {
+      meander += `<path d="M${x},${h - p} h${mSize} v${-mSize} h${mSize} v${mSize}" fill="none" stroke="#C5973A" stroke-width="1" opacity="0.42"/>`
     }
     // Left
-    for (let y = p; y < h - p - mSize; y += mSize * 2) {
-      meander += `<path d="M${p},${y} v${mSize} h${mSize} v${mSize} h${-mSize}" fill="none" stroke="#C5973A" stroke-width="1.2" opacity="0.45"/>`
+    for (let y = p + 6; y < h - p - 6 - mSize * 2; y += mSize * 2) {
+      meander += `<path d="M${p},${y} v${mSize} h${mSize} v${mSize} h${-mSize}" fill="none" stroke="#C5973A" stroke-width="1" opacity="0.42"/>`
     }
     // Right
-    for (let y = p; y < h - p - mSize; y += mSize * 2) {
-      meander += `<path d="M${w - p},${y} v${mSize} h${-mSize} v${mSize} h${mSize}" fill="none" stroke="#C5973A" stroke-width="1.2" opacity="0.45"/>`
+    for (let y = p + 6; y < h - p - 6 - mSize * 2; y += mSize * 2) {
+      meander += `<path d="M${w - p},${y} v${mSize} h${-mSize} v${mSize} h${mSize}" fill="none" stroke="#C5973A" stroke-width="1" opacity="0.42"/>`
     }
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" style="position:absolute;top:0;left:0;pointer-events:none;">
-      <rect x="18" y="18" width="${w - 36}" height="${h - 36}" rx="8" fill="none" stroke="#8B6914" stroke-width="3.5"/>
-      <rect x="28" y="28" width="${w - 56}" height="${h - 56}" rx="5" fill="none" stroke="#B8860B" stroke-width="1.5"/>
+      <!-- Outer bold frame -->
+      <rect x="14" y="14" width="${w - 28}" height="${h - 28}" rx="10" fill="none" stroke="#8B6914" stroke-width="3.5"/>
+      <!-- Secondary frame -->
+      <rect x="23" y="23" width="${w - 46}" height="${h - 46}" rx="7" fill="none" stroke="#B8860B" stroke-width="1.5"/>
+      <!-- Meander pattern between frames -->
       ${meander}
-      <rect x="${p + mSize + 2}" y="${p + mSize + 2}" width="${w - 2 * p - 2 * mSize - 4}" height="${h - 2 * p - 2 * mSize - 4}" rx="3" fill="none" stroke="#D4A847" stroke-width="0.8"/>
+      <!-- Inner fine line -->
+      <rect x="${p + mSize + 4}" y="${p + mSize + 4}" width="${w - 2 * p - 2 * mSize - 8}" height="${h - 2 * p - 2 * mSize - 8}" rx="3" fill="none" stroke="#D4A847" stroke-width="0.75" opacity="0.55"/>
+      <!-- Corner lotus ornaments -->
       ${cornerLotus(p, p, 1, 1)}
       ${cornerLotus(w - p, p, -1, 1)}
       ${cornerLotus(p, h - p, 1, -1)}
@@ -354,26 +341,33 @@ export function useTreeExport() {
 
   function cornerLotus(cx: number, cy: number, sx: number, sy: number): string {
     return `<g transform="translate(${cx},${cy}) scale(${sx},${sy})">
-      <path d="M0,0 C12,3 22,12 26,26" fill="none" stroke="#B8860B" stroke-width="2.2" opacity="0.7"/>
-      <path d="M0,0 C3,12 12,22 26,26" fill="none" stroke="#B8860B" stroke-width="2.2" opacity="0.7"/>
-      <ellipse cx="18" cy="6" rx="9" ry="4.5" fill="#DAA520" opacity="0.3" transform="rotate(18,18,6)"/>
-      <ellipse cx="6" cy="18" rx="4.5" ry="9" fill="#DAA520" opacity="0.3" transform="rotate(18,6,18)"/>
-      <ellipse cx="20" cy="14" rx="6" ry="3" fill="#DAA520" opacity="0.2" transform="rotate(38,20,14)"/>
-      <ellipse cx="14" cy="20" rx="3" ry="6" fill="#DAA520" opacity="0.2" transform="rotate(38,14,20)"/>
-      <circle cx="2" cy="2" r="3.5" fill="#B8860B" opacity="0.55"/>
-      <circle cx="2" cy="2" r="1.5" fill="#EAC65C"/>
+      <path d="M0,0 C14,4 24,14 28,28" fill="none" stroke="#8B6914" stroke-width="2.5" opacity="0.78"/>
+      <path d="M0,0 C4,14 14,24 28,28" fill="none" stroke="#8B6914" stroke-width="2.5" opacity="0.78"/>
+      <ellipse cx="20" cy="7" rx="10" ry="4.5" fill="#D4A847" opacity="0.26" transform="rotate(20,20,7)"/>
+      <ellipse cx="7" cy="20" rx="4.5" ry="10" fill="#D4A847" opacity="0.26" transform="rotate(20,7,20)"/>
+      <ellipse cx="22" cy="13" rx="7" ry="3" fill="#B8860B" opacity="0.3" transform="rotate(42,22,13)"/>
+      <ellipse cx="13" cy="22" rx="3" ry="7" fill="#B8860B" opacity="0.3" transform="rotate(42,13,22)"/>
+      <ellipse cx="24" cy="18" rx="5" ry="2.2" fill="#C5973A" opacity="0.22" transform="rotate(57,24,18)"/>
+      <ellipse cx="18" cy="24" rx="2.2" ry="5" fill="#C5973A" opacity="0.22" transform="rotate(57,18,24)"/>
+      <circle cx="2" cy="2" r="4.5" fill="#8B6914" opacity="0.58"/>
+      <circle cx="2" cy="2" r="2.5" fill="#EAC65C" opacity="0.92"/>
+      <circle cx="2" cy="2" r="1" fill="#FFFFFF" opacity="0.55"/>
+      <circle cx="15" cy="8" r="2" fill="#C5973A" opacity="0.36"/>
+      <circle cx="8" cy="15" r="2" fill="#C5973A" opacity="0.36"/>
     </g>`
   }
 
   function dividerHtml(width: number): string {
     return `<div style="display:flex;align-items:center;justify-content:center;width:${width}px;margin:0 auto;">
-      <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,#C5973A);"></div>
-      <div style="display:flex;gap:5px;padding:0 10px;">
-        <div style="width:4px;height:4px;background:#C5973A;border-radius:50%;"></div>
-        <div style="width:7px;height:7px;background:#B8860B;transform:rotate(45deg);"></div>
-        <div style="width:4px;height:4px;background:#C5973A;border-radius:50%;"></div>
+      <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,#8B6914);"></div>
+      <div style="display:flex;gap:4px;padding:0 12px;align-items:center;">
+        <div style="width:3px;height:3px;background:#C5973A;border-radius:50%;"></div>
+        <div style="width:5px;height:5px;background:#D4A017;transform:rotate(45deg);"></div>
+        <div style="width:10px;height:10px;background:#8B6914;transform:rotate(45deg);box-shadow:0 0 5px rgba(139,105,20,0.45);"></div>
+        <div style="width:5px;height:5px;background:#D4A017;transform:rotate(45deg);"></div>
+        <div style="width:3px;height:3px;background:#C5973A;border-radius:50%;"></div>
       </div>
-      <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,#C5973A);"></div>
+      <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,#8B6914);"></div>
     </div>`
   }
 
@@ -438,14 +432,16 @@ export function useTreeExport() {
       `
       document.body.appendChild(container)
 
-      // Background
+      // Background — richer parchment with golden corner glows
       const bg = document.createElement('div')
       bg.style.cssText = `
         position:absolute;inset:0;
         background:
-          radial-gradient(ellipse at 25% 15%, rgba(218,165,32,0.07) 0%, transparent 50%),
-          radial-gradient(ellipse at 75% 85%, rgba(218,165,32,0.05) 0%, transparent 50%),
-          linear-gradient(170deg, #FEF9EE 0%, #FDF3DE 35%, #FCF0D4 65%, #FBEAC6 100%);
+          radial-gradient(ellipse at 0% 0%, rgba(218,165,32,0.13) 0%, transparent 35%),
+          radial-gradient(ellipse at 100% 0%, rgba(218,165,32,0.10) 0%, transparent 35%),
+          radial-gradient(ellipse at 0% 100%, rgba(218,165,32,0.10) 0%, transparent 35%),
+          radial-gradient(ellipse at 100% 100%, rgba(218,165,32,0.13) 0%, transparent 35%),
+          linear-gradient(160deg, #FEF8E8 0%, #FDEECE 30%, #FCE9BA 60%, #FBEAB5 100%);
       `
       container.appendChild(bg)
 
@@ -464,11 +460,11 @@ export function useTreeExport() {
       const header = document.createElement('div')
       header.style.cssText = `text-align:center;padding:20px 0 15px;`
       header.innerHTML = `
-        ${dividerHtml(Math.min(450, totalW - 200))}
-        <div style="margin:14px 0 2px;font-size:20px;font-weight:500;color:#8B6914;letter-spacing:10px;">GIA PHẢ</div>
-        <div style="font-size:44px;font-weight:700;color:#5C2E0E;letter-spacing:5px;line-height:1.25;margin:0 0 6px;text-shadow:0 1px 2px rgba(0,0,0,0.06);">${escapeHtml(familyName.toUpperCase())}</div>
-        ${dividerHtml(Math.min(380, totalW - 250))}
-        <div style="margin-top:10px;font-size:12px;color:#A08050;letter-spacing:3px;">Từ đời thứ nhất đến đời thứ ${totalGens}</div>
+        ${dividerHtml(Math.min(500, totalW - 160))}
+        <div style="margin:13px 0 3px;font-size:11px;font-weight:600;color:#8B6914;letter-spacing:10px;text-align:center;">— GIA PHẢ VIỆT NAM —</div>
+        <div style="font-size:46px;font-weight:800;color:#3D1F08;letter-spacing:6px;line-height:1.2;margin:5px 0 8px;text-align:center;text-shadow:0 2px 5px rgba(0,0,0,0.09);">${escapeHtml(familyName.toUpperCase())}</div>
+        ${dividerHtml(Math.min(380, totalW - 240))}
+        <div style="margin-top:10px;font-size:12px;color:#A08050;letter-spacing:3px;text-align:center;">Từ đời thứ nhất đến đời thứ ${totalGens} &nbsp;·&nbsp; ${totalMems} thành viên</div>
       `
       content.appendChild(header)
 
@@ -514,8 +510,8 @@ export function useTreeExport() {
       footer.style.cssText = `text-align:center;padding:18px 0 5px;margin-top:5px;`
       footer.innerHTML = `
         ${dividerHtml(Math.min(320, totalW - 300))}
-        <div style="margin-top:12px;font-size:13px;color:#8B7355;letter-spacing:1px;">${totalGens} đời · ${totalMems} thành viên</div>
-        <div style="margin-top:5px;font-size:11px;color:#B0976A;font-style:italic;">Ngày xuất bản: ${dateStr}</div>
+        <div style="margin-top:10px;font-size:12px;color:#8B7355;letter-spacing:2px;text-align:center;">❖ ${totalGens} đời &nbsp;·&nbsp; ${totalMems} thành viên ❖</div>
+        <div style="margin-top:5px;font-size:10px;color:#B0976A;font-style:italic;text-align:center;">Ngày xuất bản: ${dateStr}</div>
       `
       content.appendChild(footer)
 

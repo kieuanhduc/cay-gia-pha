@@ -38,7 +38,9 @@
       "Bash(npm run seed:content:*)",
       "Bash(chmod:*)",
       "Bash(tree:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(~/.claude/skills/.venv/bin/python3:*)",
+      "Bash(npx nuxt:*)"
     ]
   }
 }
