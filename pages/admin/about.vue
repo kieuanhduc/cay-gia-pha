@@ -56,9 +56,13 @@ definePageMeta({ layout: 'admin', middleware: 'admin' })
 
 // About content
 const { data: aboutData } = useLazyFetch<any>('/api/site-content/about')
-const aboutContent = ref(aboutData.value?.content || '')
+const aboutContent = ref('')
 const savingAbout = ref(false)
 const savedAbout = ref(false)
+
+watch(aboutData, (val) => {
+  if (val?.content !== undefined) aboutContent.value = val.content
+}, { immediate: true })
 
 async function saveAbout() {
   savingAbout.value = true
@@ -79,10 +83,12 @@ const { data: contactData } = useLazyFetch<any>('/api/site-content/contact_info'
 const defaultContact = { address: '', phone: '', email: '', hours: '' }
 const contactInfo = reactive({ ...defaultContact })
 
-try {
-  const parsed = JSON.parse(contactData.value?.content || '{}')
-  Object.assign(contactInfo, parsed)
-} catch {}
+watch(contactData, (val) => {
+  try {
+    const parsed = JSON.parse(val?.content || '{}')
+    Object.assign(contactInfo, parsed)
+  } catch {}
+}, { immediate: true })
 
 const savingContact = ref(false)
 const savedContact = ref(false)
